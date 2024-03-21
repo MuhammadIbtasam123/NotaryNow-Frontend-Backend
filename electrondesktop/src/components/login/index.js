@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import React from "react";
 import "./index.css";
 import { Link } from "react-router-dom";
-import UserImg from "../../../assets/images/USer.png";
+import UserImg from "../../assets/images/USer.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -96,10 +96,10 @@ const Login = ({ AccountName }) => {
           <button className="login-button" type="button" onClick={handleLogin}>
             Login
           </button>
-          <Link href="#" className="forgot-password">
+          <Link to="/Notary" href="#" className="forgot-password">
             Forgot Password?
           </Link>
-          <Link to="/SignupClient" className="forgot-password">
+          <Link to={"/SignupNotary"} className="forgot-password">
             Don't have an account? Signup
           </Link>
         </Box>

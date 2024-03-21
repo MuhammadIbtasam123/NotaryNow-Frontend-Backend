@@ -1,0 +1,261 @@
+/* Nav.css */
+.app-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    }
+
+    .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 4.2rem;
+    }
+
+    .logo {
+    font-weight: 700;
+    letter-spacing: .3rem;
+    color: inherit;
+    text-decoration: none;
+    }
+
+    .dashboard {
+    display: flex;
+    font-family: 'Roboto' !important;
+    font-size: 2rem !important;
+    font-weight: 700;
+    letter-spacing: .3rem;
+    color: inherit;
+    }
+
+    .profile-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    }
+
+    .sign-out {
+    font-family: 'Roboto' !important;
+    color: white !important;
+    font-size: 0.5 !important;
+    }
+
+    .profile-pic {
+    width: 2rem;
+    height: auto !important;
+    border-radius: 50%;
+    }
+
+
+/* Profile use this component INformation box styles */
+.information-box {
+    border: 0.5px solid #000;
+    background-color: #0D3343;
+    width: 60rem;
+    margin-top: 3rem;
+  }
+  
+  .information-header {
+    font-size: 1.2rem !important;
+    color: #fff;
+    letter-spacing: .1rem;
+    text-align: left;
+    padding: 0.5rem 1rem ;
+  }
+  
+  .information-grid {
+    font-size: 0.8rem ;
+    background-color: #D9D9D9;
+    letter-spacing: .1rem;
+    text-align: left;
+    padding: 0.5rem 1rem;
+  }
+  
+  .information-section {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .information-attribute {
+    color: #000;
+    letter-spacing: .1rem;
+    text-align: left;
+    padding: 0.5rem 1rem;
+  }
+  
+  .information-value {
+    color: #000;
+    letter-spacing: .1rem;
+    text-align: left;
+    padding: 0.5rem 1rem;
+  }
+  
+
+  /* Filter Search bar styles  */
+
+  .filter-form {
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .filter-input {
+    padding: 0.7rem;
+    border-radius: 4px;
+    border: 0.1rem solid #ccc !important;
+    box-shadow: none;
+    margin-right: 0.3rem;
+    width: 10rem;
+  }
+  
+  .filter-button {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.2rem;
+    background-color: #007bff !important;
+    color: #fff !important;
+    border: none;
+    cursor: pointer;
+  }
+  
+  /* BoxDateTime.css */
+.box-style {
+  margin: 0.5rem;
+  padding: 0.5rem;
+  width: auto;
+  border-radius: 0.3rem;
+  border: 1px solid #0d3343;
+  background-color: #fff;
+  color: #0d3343;
+}
+
+.box-style.active {
+  background-color: #0d3343;
+  color: #fff;
+}
+
+/* SelectDate.css */
+
+.selectDateTitle {
+  font-family: monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1rem;
+  color: #0d3343 !important;
+  text-transform: uppercase;
+  padding-left: 1rem;
+  width: 100%;
+  text-align: left;
+}
+
+.selectDateContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+  background-color: #d3e3f6;
+}
+
+/* SelectTime.css */
+
+.selectTimeTitle {
+  font-family: monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1rem;
+  color: #0d3343 !important;
+  text-transform: uppercase;
+  padding-left: 1rem;
+  width: 100%;
+  text-align: left;
+}
+
+.selectTimeContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+  background-color: #d3e3f6;
+}
+
+/* Card Upcoming Styles */
+
+.cardContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 4rem;
+  width: 85%;
+  margin: 0 auto;
+}
+
+.cardContainer:nth-child(even) {
+  background-color: #fff !important;
+}
+
+.cardContainer:nth-child(odd) {
+  background-color: rgba(13, 51, 67, 0.73) !important;
+}
+
+.cardMedia {
+  width: 100px !important;
+  height: auto !important;
+  border-radius: 25%;
+  border: 1px solid #fff !important;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: left;
+  width: 100%;
+}
+
+.cardTextWhite {
+  color: #fff !important;
+}
+
+.cardTextBlack {
+  color: rgba(13, 51, 67) !important;
+}
+
+
+/* CardComponentStyles.css */
+
+.cardContainerSimple {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 4rem;
+  width: 85%;
+  margin: 0 auto;
+  background-color: rgba(13, 51, 67, 0.73) !important;
+}
+
+.cardMediaSimple {
+  width: 100px !important;
+  height: auto !important;
+  border-radius: 25%;
+  border: 1px solid #fff !important;
+}
+
+.cardContentSimple {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: left;
+  width: 100%;
+}
+
+.cardTextWhiteSimple {
+  color: #fff !important;
+}
+
+.general-flex{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

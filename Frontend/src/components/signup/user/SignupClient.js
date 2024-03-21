@@ -1,12 +1,12 @@
-import React from 'react'
-import Login from './index'
+import React from "react";
+import Login from "./index";
 
 const SignupClient = () => {
   return (
     <>
-        <Login AccountName='User'/>
+      <Login AccountName="Client" />
     </>
-  )
-}
+  );
+};
 
-export default SignupClient
+export default SignupClient;

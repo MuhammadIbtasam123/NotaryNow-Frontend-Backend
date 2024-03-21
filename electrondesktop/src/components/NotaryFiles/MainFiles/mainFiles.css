@@ -126,6 +126,9 @@
     border-right: 1px solid #0d3343 !important;
     padding-right: 1rem;
 }
+.title-space{
+  margin-bottom: 1rem;
+}
   
   .subtitle {
     font-family: monospace !important;
@@ -314,61 +317,5 @@
   
   .documentButton {
     color: #0D3343 !important;
-  }
-  /* Quiz App.module.css */
-
-  .createAppointmentContainer {
-    padding: 1rem !important;
-    border: 3px solid black;
-  }
-
-  .Quiz-subtitle {
-    font-family: monospace !important;
-    font-size: 1.2rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.1rem;
-    color: #d63a3a !important;
-    text-align: center;
-    text-transform: uppercase;
-    padding-left: 1rem;
-}
-  
-  .questionContainer {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-  }
-
-  .Quiz-Form{
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: start;
-
-  }
-  
-  .questionText {
-    color: #001e3c;
-    font-size: 1.5rem !important;
-    align-self: flex-start;
-    margin-bottom: 10px;
-
-  }
-  
-  .optionsContainer {
-    display: flex;
-    flex-direction: row !important;
-  }
-  
-  .optionLabel {
-    margin-right: 20px;
-  }
-  
-  .checkbox {
-    margin-right: 10px;
-  }
-  
-  .submitButton {
-    margin-top: 20px;
   }
   

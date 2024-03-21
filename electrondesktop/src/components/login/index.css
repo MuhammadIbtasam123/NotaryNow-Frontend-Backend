@@ -9,7 +9,7 @@
 .LoginBox{
     background-color: #FFFFFF;
     width: 60vw;
-    height: 90vh;
+    height: 80vh;
     margin: 0 auto;
     border-radius: 10px ;
     border : 1px solid black;
@@ -20,7 +20,7 @@
 
 .LoginUserImg{
     width: 50%;
-    height: 90vh;
+    height: 80vh;
     background-color: #0D3343;
     border-radius: 10px 0px 0px 10px;
     border-right: 1px solid black;
@@ -36,7 +36,7 @@
 }
 .LoginUserData{
     width: 50%;
-    height: 90vh;
+    height: 80vh;
     background-color: #FFFFFF;
     border-radius: 0px 10px 10px 0px;
     display: flex;
@@ -113,42 +113,3 @@
     text-decoration: underline;
   }
   
-  .LoginUserData {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .LoginUserData {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Style for file input fields */
-  /* .file-input {
-    margin-bottom: 10px; /* Add margin between each input field 
-  } 
-  */
-  
-  /* Hide the default file input button */
-  /* .file-input input[type="file"] {
-    display: none;
-  } */
-  
-  /* Style for custom file input button */
-  .file-input label {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    padding: 2px;
-    cursor: pointer;
-  }
-  
-  /* Align file input buttons in a row */
-  .file-input {
-    display: flex;
-    flex-direction: row;
-  }
-  
-  /* Add margin between file input buttons */
-  /* .file-input label {
-    margin-right: 10px;
-  } */

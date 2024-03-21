@@ -1,23 +1,26 @@
 import * as React from "react";
-import { experimentalStyled as styled } from "@mui/material/styles";
-import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import Box from "@mui/material/Box";
-import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Unstable_Grid2";
-import Nav from "./HelperFiles/Nav";
-import AppBar from "@mui/material/AppBar";
+import {
+  styled,
+  Stack,
+  Button,
+  Box,
+  Paper,
+  Grid,
+  Nav,
+  AppBar,
+} from "./muiComponents";
+
+// Now you can use these components in your main file
+
 import Profile from "./MainFiles/Profile";
-import UploadDocument from "./MainFiles/UploadDocument";
-import CreateAppointment from "./MainFiles/CreateAppointment";
-import BookAppointment from "./MainFiles/BookAppointment";
-import UnpaidAppointments from "./MainFiles/UnpaidAppointments";
+import UnconfirmAppointments from "./MainFiles/UnconfirmAppointments";
 import UpcomingAppointmnets from "./MainFiles/UpcomingAppointments";
 import NoatrizedDocuments from "./MainFiles/NotarizedDocuments";
-import QuizApp from "./MainFiles/Quiz";
+import AvailabilityForm from "./MainFiles/Availability";
 import Missing from "./MainFiles/Missing";
+
 import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
-import * as UserStyles from "./userStyle";
+import * as UserStyles from "./NotaryStyle";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -27,14 +30,14 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-const User = () => {
+const Notary = () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Router>
         <Grid container spacing={6} columnSpacing={2}>
           <Grid xs={12} md={12}>
             <Item>
-              <Nav User="Client" />
+              <Nav User="Notary" />
             </Item>
           </Grid>
           <Grid xs={6} md={2.5}>
@@ -46,7 +49,7 @@ const User = () => {
                   spacing={5}
                   sx={{ marginTop: "1rem" }}
                 >
-                  <Link to="/User">
+                  <Link to="/Notary">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
@@ -56,37 +59,27 @@ const User = () => {
                       Profile
                     </Button>
                   </Link>
-                  <Link to="/User/Upload-Documents">
+                  <Link to="/Notary/Availability">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
                         "&:hover": { ...UserStyles.buttonStyleHover },
                       }}
                     >
-                      Upload Document
+                      Availability Form
                     </Button>
                   </Link>
-                  <Link to="/User/Create-Appointments">
+                  <Link to="/Notary/Unconfirm-Appointments">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
                         "&:hover": { ...UserStyles.buttonStyleHover },
                       }}
                     >
-                      Create Appointment
+                      Unconfirm Appointments
                     </Button>
                   </Link>
-                  <Link to="/User/Unpaid-Appointments">
-                    <Button
-                      sx={{
-                        ...UserStyles.buttonStyle,
-                        "&:hover": { ...UserStyles.buttonStyleHover },
-                      }}
-                    >
-                      Unpaid Appointments
-                    </Button>
-                  </Link>
-                  <Link to="/User/Upcoming-Appointments">
+                  <Link to="/Notary/Upcoming-Appointments">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
@@ -96,7 +89,7 @@ const User = () => {
                       Upcoming Appointments
                     </Button>
                   </Link>
-                  <Link to="/User/Notarized-Documents">
+                  <Link to="/Notary/Notarized-Documents">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
@@ -104,6 +97,16 @@ const User = () => {
                       }}
                     >
                       Notarized Documents
+                    </Button>
+                  </Link>
+                  <Link to="/Notary/Session">
+                    <Button
+                      sx={{
+                        ...UserStyles.buttonStyle,
+                        "&:hover": { ...UserStyles.buttonStyleHover },
+                      }}
+                    >
+                      Start Video Call
                     </Button>
                   </Link>
                 </Stack>
@@ -115,37 +118,27 @@ const User = () => {
               <Switch>
                 <Route
                   exact
-                  path="/User/Upload-Documents"
-                  component={UploadDocument}
+                  path="/Notary/Availability"
+                  component={AvailabilityForm}
+                />
+
+                <Route
+                  exact
+                  path="/Notary/Notarized-Documents"
+                  component={NoatrizedDocuments}
                 />
                 <Route
                   exact
-                  path="/User/Create-Appointments/Book-Appointments"
-                  component={BookAppointment}
-                />
-                <Route
-                  exact
-                  path="/User/Create-Appointments"
-                  component={CreateAppointment}
-                />
-                <Route
-                  exact
-                  path="/User/Unpaid-Appointments"
-                  component={UnpaidAppointments}
-                />
-                <Route
-                  exact
-                  path="/User/Upcoming-Appointments"
+                  path="/Notary/Upcoming-Appointments"
                   component={UpcomingAppointmnets}
                 />
                 <Route
                   exact
-                  path="/User/Notarized-Documents"
-                  component={NoatrizedDocuments}
+                  path="/Notary/Unconfirm-Appointments"
+                  component={UnconfirmAppointments}
                 />
-                <Route exact path="/User/Quiz" component={QuizApp} />
-                <Route exact path="/User" component={Profile} />
-                <Route path="*" component={Missing} />
+                <Route exact path="/Notary" component={Profile} />
+                <Route exact path="*" component={Missing} />
               </Switch>
             </Item>
           </Grid>
@@ -154,4 +147,4 @@ const User = () => {
     </Box>
   );
 };
-export default User;
+export default Notary;

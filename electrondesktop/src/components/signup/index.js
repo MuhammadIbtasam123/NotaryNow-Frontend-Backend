@@ -1,9 +1,10 @@
 import axios from "axios";
 import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import React, { useState } from "react";
+import React from "react";
 import "./index.css";
-import UserImg from "../../../assets/images/USer.png";
+import UserImg from "../../assets/images/USer.png";
+import { useState } from "react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
@@ -11,14 +12,12 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Signup = ({ AccountName }) => {
+  // Dynamic states for input fields
   const [username, setUsername] = useState("");
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [cnic, setCnic] = useState("");
-  const [frontImage, setFrontImage] = useState(null); // State for front side image
-  const [backImage, setBackImage] = useState(null); // State for back side image
   const [showToastFlag, setShowToastFlag] = useState(false);
   const history = useHistory();
 
@@ -37,51 +36,41 @@ const Signup = ({ AccountName }) => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (
-      !username ||
-      !email ||
-      !password ||
-      !confirmpassword ||
-      !cnic ||
-      !frontImage ||
-      !backImage
-    ) {
+    // Check if any field is empty
+    if (!username || !email || !password || !confirmpassword || !cnic) {
       showToast("Please fill all the fields", "error");
       return;
     }
 
+    // Check if password and confirm password are same
     if (password !== confirmpassword) {
       showToast("Password and Confirm Password are not the same", "error");
       return;
     }
 
+    // Check if CNIC is valid
     if (cnic.length !== 13) {
       showToast("CNIC should be 13 digits", "error");
       return;
     }
-
     const cnicFormat = `${cnic.slice(0, 5)}-${cnic.slice(5, 12)}-${cnic.slice(
       12,
       13
     )}`;
 
     try {
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("confirmpassword", confirmpassword);
-      formData.append("cnic", cnicFormat);
-      formData.append("frontImage", frontImage); // Append front side image to form data
-      formData.append("backImage", backImage); // Append back side image to form data
-
-      const response = await axios.post(
-        "http://localhost:3001/signup",
-        formData
-      );
+      const response = await axios.post("http://localhost:3001/signup", {
+        username: username,
+        email: email,
+        password: password,
+        confirmpassword: confirmpassword,
+        cnic: cnicFormat,
+      });
 
       if (response.status === 200) {
         showToast("Signup Successful!", "success");
+        // redirect to Landing page using react router
+        // history.push('/login');
       } else if (response.status === 500) {
         showToast("Error SignUp!", "error");
       }
@@ -95,7 +84,7 @@ const Signup = ({ AccountName }) => {
     if (showToastFlag) {
       timer = setTimeout(() => {
         history.push("/login");
-      }, 2000);
+      }, 2000); // Redirect to login after 2 seconds when toast is shown
     }
     return () => clearTimeout(timer);
   }, [showToastFlag, history]);
@@ -124,23 +113,12 @@ const Signup = ({ AccountName }) => {
               setUsername(event.target.value);
             }}
           />
-          {/* Name */}
-          <input
-            id="Name"
-            type="text"
-            placeholder="Name"
-            className="text-field"
-            name="Name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-          />
 
           {/* email */}
           <input
             id="email"
             type="email"
+            f
             placeholder="Email"
             className="text-field"
             name="email"
@@ -191,24 +169,6 @@ const Signup = ({ AccountName }) => {
               (regex.test(userInput) || userInput === "") && setCnic(userInput);
             }}
           />
-          <div className="file-input">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setFrontImage(e.target.files[0])}
-            />
-            <label>Front CNIC</label>
-          </div>
-
-          {/* Back side image input field */}
-          <div className="file-input">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setBackImage(e.target.files[0])}
-            />
-            <label>Back CNIC</label>
-          </div>
           <button
             className="login-button"
             type="button"
@@ -217,7 +177,7 @@ const Signup = ({ AccountName }) => {
             Register
           </button>
 
-          <Link to="/LoginClient" className="forgot-password">
+          <Link to={"/LoginNotary"} className="forgot-password">
             Have an account? Login
           </Link>
         </Box>
