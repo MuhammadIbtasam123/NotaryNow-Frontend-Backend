@@ -35,6 +35,7 @@ User.init(
     cnic: {
       type: DataTypes.STRING,
       allowNull: false,
+      primaryKey: true,
     },
   },
   {

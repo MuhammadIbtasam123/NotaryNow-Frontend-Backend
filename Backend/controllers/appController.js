@@ -7,8 +7,7 @@ export async function signup(req, res) {
     // Check if the username or email already exists in the database
     const existingUser = await User.findOne({
       where: {
-        username: username,
-        email: email,
+        cnic,
       },
     });
     if (existingUser) {
