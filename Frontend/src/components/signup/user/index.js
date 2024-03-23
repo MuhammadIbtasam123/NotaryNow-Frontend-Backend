@@ -17,8 +17,8 @@ const Signup = ({ AccountName }) => {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [cnic, setCnic] = useState("");
-  const [frontImage, setFrontImage] = useState(null); // State for front side image
-  const [backImage, setBackImage] = useState(null); // State for back side image
+  // const [frontImage, setFrontImage] = useState(null); // State for front side image
+  // const [backImage, setBackImage] = useState(null); // State for back side image
   const [showToastFlag, setShowToastFlag] = useState(false);
   const history = useHistory();
 
@@ -42,9 +42,9 @@ const Signup = ({ AccountName }) => {
       !email ||
       !password ||
       !confirmpassword ||
-      !cnic ||
-      !frontImage ||
-      !backImage
+      !cnic
+      // !frontImage ||
+      // !backImage
     ) {
       showToast("Please fill all the fields", "error");
       return;
@@ -66,24 +66,22 @@ const Signup = ({ AccountName }) => {
     )}`;
 
     try {
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("email", email);
-      formData.append("password", password);
-      formData.append("confirmpassword", confirmpassword);
-      formData.append("cnic", cnicFormat);
-      formData.append("frontImage", frontImage); // Append front side image to form data
-      formData.append("backImage", backImage); // Append back side image to form data
+      console.log({ username, name, email, password, cnicFormat });
 
-      const response = await axios.post(
-        "http://localhost:3001/signup",
-        formData
-      );
+      const response = await axios.post("http://localhost:8080/api/signup", {
+        username,
+        name,
+        email,
+        password,
+        cnic: cnicFormat,
+      });
+
+      console.log(response.data);
 
       if (response.status === 200) {
-        showToast("Signup Successful!", "success");
-      } else if (response.status === 500) {
-        showToast("Error SignUp!", "error");
+        showToast(response.data.message, "success");
+      } else if (response.status === 400) {
+        showToast(response.data.message, "error");
       }
     } catch (error) {
       showToast("Error SignUp!", "error");
@@ -136,7 +134,6 @@ const Signup = ({ AccountName }) => {
               setName(event.target.value);
             }}
           />
-
           {/* email */}
           <input
             id="email"
@@ -149,7 +146,6 @@ const Signup = ({ AccountName }) => {
               setEmail(event.target.value);
             }}
           />
-
           {/* Password */}
           <input
             id="password"
@@ -162,7 +158,6 @@ const Signup = ({ AccountName }) => {
               setPassword(event.target.value);
             }}
           />
-
           {/* Confirm password */}
           <input
             id="confirmpassword"
@@ -175,7 +170,6 @@ const Signup = ({ AccountName }) => {
               setConfirmPassword(event.target.value);
             }}
           />
-
           {/* CNIC */}
           <input
             id="cnic"
@@ -191,24 +185,23 @@ const Signup = ({ AccountName }) => {
               (regex.test(userInput) || userInput === "") && setCnic(userInput);
             }}
           />
-          <div className="file-input">
+          {/* <div className="file-input">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setFrontImage(e.target.files[0])}
             />
             <label>Front CNIC</label>
-          </div>
-
+          </div> */}
           {/* Back side image input field */}
-          <div className="file-input">
+          {/* <div className="file-input">
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setBackImage(e.target.files[0])}
             />
             <label>Back CNIC</label>
-          </div>
+          </div> */}
           <button
             className="login-button"
             type="button"
@@ -216,7 +209,6 @@ const Signup = ({ AccountName }) => {
           >
             Register
           </button>
-
           <Link to="/LoginClient" className="forgot-password">
             Have an account? Login
           </Link>

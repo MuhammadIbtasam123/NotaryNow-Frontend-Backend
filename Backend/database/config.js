@@ -1,22 +1,24 @@
-import Client from "pg";
+import Sequelize from "sequelize";
 import dotenv from "dotenv";
 dotenv.config();
 
-const connect = async () => {
-  const client = new Client.Client({
+const sequelize = new Sequelize(
+  "NotaryNow",
+  "postgres",
+  process.env.DB_PASSWORD,
+  {
     host: "localhost",
-    user: "postgres",
-    password: process.env.DB_PASSWORD,
-    database: "NotaryNow",
-    port: 5432,
-  });
+    dialect: "postgres",
+  }
+);
 
+(async () => {
   try {
-    await client.connect();
+    await sequelize.authenticate();
     console.log("Connected to the database");
   } catch (error) {
-    console.log("Cannot connect to the database");
+    console.error("Unable to connect to the database:", error);
   }
-};
+})();
 
-export default connect;
+export default sequelize;

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import connect from "./database/config.js";
-// import router from "./router/route.js";
+import router from "./router/route.js";
 
 const app = express();
 
@@ -22,17 +22,7 @@ app.get("/", (req, res) => {
 /** api routes */
 app.use("/api", router);
 
-/** start server only when we have valid connection */
-connect() // connect to the database
-  .then(() => {
-    try {
-      app.listen(port, () => {
-        console.log(`Server connected to http://localhost:${port}`);
-      });
-    } catch (error) {
-      console.log("Cannot connect to the server");
-    }
-  })
-  .catch((error) => {
-    console.log("Invalid database connection...!");
-  });
+// server
+app.listen(port, async () => {
+  console.log(`Server is running on port ${port}`);
+});
