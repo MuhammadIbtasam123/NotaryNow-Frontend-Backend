@@ -84,7 +84,7 @@ const Signup = ({ AccountName }) => {
         showToast(response.data.message, "error");
       }
     } catch (error) {
-      showToast("Username or email already exists", "error");
+      showToast("Error while signing up!", "error");
     }
   };
 

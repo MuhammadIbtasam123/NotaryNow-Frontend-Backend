@@ -1,17 +1,7 @@
 import { Model, DataTypes } from "sequelize";
-import bcrypt from "bcrypt";
 import sequelize from "../database/config.js";
 
-class User extends Model {
-  async hashSensitiveFields(fields) {
-    const saltRounds = 10;
-    for (const field of fields) {
-      if (this.changed(field)) {
-        this[field] = await bcrypt.hash(this[field], saltRounds);
-      }
-    }
-  }
-}
+class User extends Model {}
 
 User.init(
   {
@@ -41,18 +31,10 @@ User.init(
   {
     sequelize,
     modelName: "User",
-    hooks: {
-      beforeCreate: async (user) => {
-        await user.hashSensitiveFields(["password", "cnic", "email", "name"]);
-      },
-      beforeUpdate: async (user) => {
-        await user.hashSensitiveFields(["password", "cnic", "email", "name"]);
-      },
-    },
   }
 );
 
-// if db not exsited
+// if database is not there
 User.sync();
 
 export default User;
