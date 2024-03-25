@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export async function sendOTP(email, otp) {
+export async function sendRedirectLink(email, token) {
   // Create a transporter object using SMTP transport
   const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -15,12 +15,13 @@ export async function sendOTP(email, otp) {
 
   // Mail options
   const mailOptions = {
-    from: process.env.GMAIL_USER, // sender address
-    to: email, // receiver address
-    subject: `OTP for email verification`,
-    text: `
-    Your OTP for email verification is ${otp}.
-    `,
+    from: process.env.GMAIL_USER, // companys address
+    to: email,
+    subject: "Password Reset Request",
+    text: `You are receiving this email because you has requested a password reset for your account.\n\n
+            Please click on the following link, or paste this into your browser to complete the process:\n\n
+            http://localhost:3000/reset-password?token=${token}\n\n
+            If you did not request this, please ignore this email and your password will remain unchanged.`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {

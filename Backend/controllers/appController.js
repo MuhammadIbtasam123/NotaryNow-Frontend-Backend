@@ -2,6 +2,9 @@ import User from "../model/User.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import otpGenerator from "otp-generator";
+import { sendOTP } from "./mailer.js";
+import generateToken from "../helperFunctions/helper.js";
+import { sendRedirectLink } from "./resetMailer.js";
 
 /** middleware for verify user */
 export async function verifyUser(req, res, next) {
@@ -96,6 +99,7 @@ export async function login(req, res) {
           {
             cnic: user.dataValues.cnic,
             username: user.dataValues.username,
+            email: user.dataValues.email,
           },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
@@ -194,21 +198,96 @@ export async function updateUser(req, res) {
 
 /** GET: http://localhost:8080/api/generateOTP */
 export async function generateOTP(req, res) {
-  req.app.locals.OTP = otpGenerator.generate(6, {
+  console.log(req.body);
+  // verify the token from the user and extract info from it
+  // const { token } = req.body;
+  // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // console.log(decoded);
+
+  const { email } = req.body;
+
+  req.app.locals.OTP = await otpGenerator.generate(6, {
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
   });
-  res.status(201).send({ code: req.app.locals.OTP });
+  // if there is req from frontend then send the otp to the user
+  if (req) {
+    await sendOTP(email, req.app.locals.OTP);
+  }
 }
 
 /** GET: http://localhost:8080/api/verifyOTP */
 export async function verifyOTP(req, res) {
-  const { code } = req.query;
-  if (parseInt(req.app.locals.OTP) === parseInt(code)) {
+  // getting back the otp from the user
+  const { otp } = req.body;
+  // comapring the otp with the generated otp
+
+  if (parseInt(req.app.locals.OTP) === parseInt(otp)) {
     req.app.locals.OTP = null; // reset the OTP value
-    req.app.locals.resetSession = true; // start session for reset password
-    return res.status(201).send({ msg: "Verify Successsfully!" });
+    return res.status(200).send({ msg: "OTP Verify Successsfully!" });
+  } else {
+    return res.status(400).send({ error: "Invalid OTP" });
   }
-  return res.status(400).send({ error: "Invalid OTP" });
 }
+
+/** PUT: http://localhost:8080/api/forgotPassword */
+export async function forgotPassword(req, res) {
+  // decode the token and extract the email from it
+  const { token } = req.body;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  console.log(decoded.email);
+  const { email } = decoded;
+
+  try {
+    // Find the user by their email
+    const user = await User.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: " Email not registered!" });
+    }
+
+    // gnerate new token and send redirect link to the user
+    const token = generateToken();
+    sendRedirectLink(email, token);
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error(`Error updating password: ${error.message}`);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+// Endpoint to handle password reset
+export const resetPassword = async (req, res) => {
+  // console.log(req.body);
+  const { token, newPassword } = req.body;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const email = decoded.email;
+  console.log(decoded);
+
+  // Validate token and update user's password in your database (not implemented here)
+  //  we have to update the password in the database
+  const user = await User.findOne({
+    where: { email },
+  });
+
+  if (!user) {
+    return res.status(404).json({ message: "Email not registered!" });
+  }
+
+  // Hash the new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // Update the user's password in the database
+  await User.update(
+    { password: hashedPassword },
+    {
+      where: { email },
+    }
+  );
+
+  res.status(200).send("Password reset successfully");
+};

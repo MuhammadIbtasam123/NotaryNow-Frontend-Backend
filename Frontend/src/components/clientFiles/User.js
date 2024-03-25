@@ -145,6 +145,7 @@ const User = () => {
                 />
                 <Route exact path="/User/Quiz" component={QuizApp} />
                 <Route exact path="/User" component={Profile} />
+
                 <Route path="*" component={Missing} />
               </Switch>
             </Item>

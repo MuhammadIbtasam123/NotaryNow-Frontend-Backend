@@ -5,7 +5,7 @@ import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import React from "react";
 import "./index.css";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import UserImg from "../../../assets/images/USer.png";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,6 +16,9 @@ const Login = ({ AccountName }) => {
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [openModal, setOpenModal] = useState(false); // State to control modal display
+  const [loading, setLoading] = useState(false);
+  const history = useHistory();
+
   const showToast = (message, type) => {
     toast[type](message, {
       position: "top-center",
@@ -38,8 +41,10 @@ const Login = ({ AccountName }) => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      // sending login requet to backend on endpoint /login using axios
+      // sending login request to backend on endpoint /login using axios
       const response = await axios.post("http://localhost:8080/api/login", {
         email: email,
         password: password,
@@ -47,35 +52,74 @@ const Login = ({ AccountName }) => {
 
       if (response.status === 200) {
         // notification for successful login
-        console.log(response.data);
         const token = response.data.token;
         localStorage.setItem("token", token);
+
+        // Generate OTP after successful login
+        axios.post("http://localhost:8080/api/generateOTP", {
+          email: email,
+          // sending the token from local storage to backend for verification
+          token: localStorage.getItem("token"),
+        });
+        // console.log(email);
         setOpenModal(true); // Open OTP verification modal upon successful login
-        // redirect to dashboard page
-        // window.location.href = "/User";
-        showToast("Login Successful!", "success");
       } else if (response.status === 500) {
-        // notification for unsuccessful signup
-        // redirect to login page again with error message
+        // notification for unsuccessful login
         showToast("Error Login!", "error");
       }
     } catch (error) {
-      // console.log(error)
-      showToast("Email or Password incoorect !", "error");
+      showToast("Email or Password incorrect !", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   // handling OTP verification
+  const handleOTP = async () => {
+    try {
+      const response = await axios.post("http://localhost:8080/api/verifyOTP", {
+        otp: otp,
+      });
 
-  const HandleVerifyOTP = async () => {
-    // Add your OTP verification logic here
-    const response = await axios.post(
-      "http://localhost:8080/api/verifyOTP",
-      {}
-    );
-    // If OTP is verified successfully, close the modal
-    setOpenModal(false);
-    showToast("OTP Verified Successfully!", "success");
+      if (response.status === 200) {
+        setOpenModal(false);
+
+        // halt to move to user page after successful OTP verification using setTimeout
+        showToast("OTP Verified Successfully!", "success");
+        // Redirect user to /user route after successful OTP verification
+        setTimeout(() => {
+          history.push("/user");
+        }, 3000);
+      } else {
+        showToast("OTP Verification Failed!", "error");
+      }
+    } catch (error) {
+      showToast("Error verifying OTP!", "error");
+    }
+  };
+
+  // Resend OTP function
+  const resendOTP = async () => {
+    try {
+      await axios.post("http://localhost:8080/api/generateOTP", {
+        email: email,
+        token: localStorage.getItem("token"),
+      });
+      showToast("OTP Resent Successfully!", "success");
+    } catch (error) {
+      showToast("Error resending OTP!", "error");
+    }
+  };
+
+  const forgotPassword = async () => {
+    try {
+      await axios.put("http://localhost:8080/api/forgotPassword", {
+        token: localStorage.getItem("token"),
+      });
+      showToast("Password reset link sent to your email!", "success");
+    } catch (error) {
+      showToast("Error sending reset link!", "error");
+    }
   };
 
   return (
@@ -93,7 +137,7 @@ const Login = ({ AccountName }) => {
           </Typography>
           <input
             type="text"
-            placeholder="Enter you email"
+            placeholder="Enter your email"
             className="text-field"
             name="email"
             value={email}
@@ -112,17 +156,23 @@ const Login = ({ AccountName }) => {
               setPassword(event.target.value);
             }}
           />
-          <button className="login-button" type="button" onClick={handleLogin}>
-            Login
+          <button
+            className="login-button"
+            type="button"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? "Logging In..." : "Login"}
           </button>
-          <Link href="#" className="forgot-password">
+          <button to="#" className="forgot-password" onClick={forgotPassword}>
             Forgot Password?
-          </Link>
+          </button>
           <Link to="/SignupClient" className="forgot-password">
             Don't have an account? Signup
           </Link>
         </Box>
       </Box>
+      {/* OTP Verification Modal */}
       {/* OTP Verification Modal */}
       <Modal
         open={openModal}
@@ -149,29 +199,41 @@ const Login = ({ AccountName }) => {
             variant="body1"
             id="otp-verification-modal-description"
             sx={{ mb: 2 }}
+            style={{
+              color: "red",
+            }}
           >
-            Please enter the OTP sent to your registered email/mobile number.
+            Please enter the OTP sent to your registered email.
           </Typography>
-          {/* Add your OTP input field and verification button here */}
+          {/* OTP input field */}
           <input
             type="text"
             placeholder="Enter OTP"
             className="text-field"
             name="otp"
-          />
-          <button
-            onClick={HandleVerifyOTP}
-            className="login-button"
-            type="button"
             value={otp}
             onChange={(event) => {
               setOtp(event.target.value);
             }}
-          >
+          />
+          {/* Verify OTP button */}
+          <button onClick={handleOTP} className="login-button" type="button">
             Verify OTP
+          </button>
+          {/* Resend OTP button */}
+          <button
+            onClick={resendOTP}
+            className="login-button "
+            style={{
+              marginTop: "10px",
+            }}
+            type="button"
+          >
+            Resend OTP
           </button>
         </Box>
       </Modal>
+
       <ToastContainer />
     </Box>
   );

@@ -107,6 +107,8 @@
     text-decoration: none;
     color: #0D3343;
     font-size: 14px;
+    background-color: white !important;
+    border: none;
   }
   
   .forgot-password:hover {
