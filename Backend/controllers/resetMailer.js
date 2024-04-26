@@ -30,7 +30,10 @@ export async function sendRedirectLink(email, token) {
       res.status(500).json({ success: false, message: "Failed to send email" });
     } else {
       console.log("Email sent: " + info.response);
-      res.json({ success: true, message: "Email sent successfully" });
+      res.json({
+        success: true,
+        message: "Email sent successfully",
+      });
     }
   });
 }

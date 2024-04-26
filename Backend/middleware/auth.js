@@ -24,3 +24,9 @@ export function localVariables(req, res, next) {
   };
   next();
 }
+
+export function forgotPassword(req, res, next) {
+  req.app.locals.ResetToken = null;
+  req.app.locals.email = null;
+  next();
+}

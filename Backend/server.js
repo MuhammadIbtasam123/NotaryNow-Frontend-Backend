@@ -1,16 +1,21 @@
 import express from "express";
 import cors from "cors";
 import morgan from "morgan";
-import connect from "./database/config.js";
 import router from "./router/route.js";
 
 const app = express();
 
 /** middlewares */
-app.use(express.json());
+app.use(
+  express.json({
+    limit: "30mb",
+    extended: true,
+  })
+);
+
 app.use(cors());
 app.use(morgan("tiny"));
-app.disable("x-powered-by"); // less hackers know about our stack
+app.disable("x-powered-by"); // less hackers know about our
 
 const port = 8080;
 

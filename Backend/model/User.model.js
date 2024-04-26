@@ -27,6 +27,26 @@ User.init(
       allowNull: false,
       primaryKey: true,
     },
+    contact: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    profileImage: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    cnicFront: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    cnicBack: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   },
   {
     sequelize,

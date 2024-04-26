@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Box } from "@mui/material";
 import Modal from "@mui/material/Modal";
@@ -17,6 +17,7 @@ const Login = ({ AccountName }) => {
   const [otp, setOtp] = useState("");
   const [openModal, setOpenModal] = useState(false); // State to control modal display
   const [loading, setLoading] = useState(false);
+  const [flag, setFlag] = useState(false);
   const history = useHistory();
 
   const showToast = (message, type) => {
@@ -113,9 +114,16 @@ const Login = ({ AccountName }) => {
 
   const forgotPassword = async () => {
     try {
+      // email validation
+      if (!email) {
+        showToast("Please enter your email!", "error");
+        return;
+      }
+
       await axios.put("http://localhost:8080/api/forgotPassword", {
-        token: localStorage.getItem("token"),
+        email: email,
       });
+
       showToast("Password reset link sent to your email!", "success");
     } catch (error) {
       showToast("Error sending reset link!", "error");

@@ -22,38 +22,75 @@
     margin-top: 2rem;
   }
   
-
-  /* UploadDocumentStyles.css */
+/* UploadDocumentStyles.css */
 .container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-  }
-  
-  .uploadTitle {
-    font-family: monospace;
-    font-weight: 700 !important;
-    letter-spacing: 0.1rem;
-    color: #0D3343 !important;
-    text-align: center;
-    text-transform: uppercase;
-    border-right: 1px solid #0D3343 !important;
-    padding-right: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: start;
-  }
-  
-  .uploadFileButton {
-    padding: 0.15rem 0.5rem;
-    font-size: 1rem !important;
-    border: 1px solid #0D3343 !important;
-    color: #0D3343  !important;
-    font-weight: 500 !important;
-    letter-spacing: 0.1rem;
-    text-transform: capitalize;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.uploadTitle {
+  font-family: monospace;
+  font-weight: 700 !important;
+  letter-spacing: 0.1rem;
+  color: #0D3343 !important;
+  text-align: center;
+  text-transform: uppercase;
+  border-right: 1px solid #0D3343 !important;
+  padding-right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+}
+
+.uploadFileButton {
+  padding: 0.15rem 0.5rem;
+  font-size: 1rem !important;
+  border: 1px solid #0D3343 !important;
+  color: #0D3343  !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1rem;
+  text-transform: capitalize;
+  position: absolute;
+  left: -9999px; /* Hide the default input */
+}
+
+.deleteButton {
+  color: #ff0000 !important; /* Set font color to red */
+  background-color: transparent; /* Transparent background */
+  border: none; /* Remove button border */
+  padding: 0.5rem; /* Adjust padding */
+  display: flex; /* Make button and icon inline */
+  align-items: center; /* Center content vertically */
+}
+
+.deleteButton:hover {
+  background-color: rgba(255, 0, 0, 0.1) !important; /* Add a slight transparent red background on hover */
+}
+
+.fileInputLabel {
+  display: flex;
+  align-items: center; /* Center vertically */
+  padding: 0.15rem 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #0D3343 !important;
+  border-radius: 0.2rem;
+  color: #0D3343;
+  font-weight: 500;
+  letter-spacing: 0.1rem;
+  text-transform: capitalize;
+  display: inline-block; /* Ensure the label displays inline */
+  cursor: pointer; /* Change cursor to pointer */
+  transition: background-color 0.3s ease; /* Add transition effect */
+}
+
+.fileInputLabel:hover {
+  background-color: #0D3343; /* Change background color on hover */
+  color: #fff; /* Change text color on hover */
+}
+/* Add more styles as needed */
+
   
   /* Rest of the styles for document list */
   .documentListContainer {

@@ -6,9 +6,11 @@ import "./index.css";
 import UserImg from "../../../assets/images/USer.png";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+// import Modal from "@mui/material/Modal";
 import { useHistory } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import convertToBase64 from "../../helperFunctions/helperFunctions.js";
 
 const Signup = ({ AccountName }) => {
   const [username, setUsername] = useState("");
@@ -17,9 +19,14 @@ const Signup = ({ AccountName }) => {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [cnic, setCnic] = useState("");
-  // const [frontImage, setFrontImage] = useState(null); // State for front side image
-  // const [backImage, setBackImage] = useState(null); // State for back side image
+  const [frontImage, setFrontImage] = useState(null); // State for front side image
+  const [backImage, setBackImage] = useState(null); // State for back side image
+  // const [frontImageUrl, setFrontImageUrl] = useState(""); // State for front image preview URL
+  // const [backImageUrl, setBackImageUrl] = useState(""); // State for back image preview URL
+  // const [openPreview, setOpenPreview] = useState(false); // State for opening preview modal
   const [showToastFlag, setShowToastFlag] = useState(false);
+  // const [previewSide, setPreviewSide] = useState(null); // State to store which side is being previewed
+
   const history = useHistory();
 
   const showToast = (message, type) => {
@@ -38,13 +45,8 @@ const Signup = ({ AccountName }) => {
   const handleRegister = async (e) => {
     e.preventDefault();
     if (
-      !username ||
-      !email ||
-      !password ||
-      !confirmpassword ||
-      !cnic
-      // !frontImage ||
-      // !backImage
+      (!username || !email || !password || !confirmpassword || !cnic,
+      !frontImage || !backImage)
     ) {
       showToast("Please fill all the fields", "error");
       return;
@@ -74,6 +76,8 @@ const Signup = ({ AccountName }) => {
         email,
         password,
         cnic: cnicFormat,
+        frontImage,
+        backImage,
       });
 
       console.log(response.data);
@@ -87,7 +91,22 @@ const Signup = ({ AccountName }) => {
       showToast("Error while signing up!", "error");
     }
   };
+  const onUpload = async (e, side) => {
+    if (side === "front") {
+      const base64 = await convertToBase64(e.target.files[0]);
+      setFrontImage(base64);
+      // setFrontImageUrl(URL.createObjectURL(e.target.files[0])); // Set preview URL
+    } else if (side === "back") {
+      const base64 = await convertToBase64(e.target.files[0]);
+      setBackImage(base64);
+      // setBackImageUrl(URL.createObjectURL(e.target.files[0])); // Set preview URL
+    }
+  };
 
+  const handleOpenPreview = (side) => {
+    // setPreviewSide(side); // Set the side being previewed
+    // setOpenPreview(true);
+  };
   useEffect(() => {
     let timer;
     if (showToastFlag) {
@@ -102,7 +121,7 @@ const Signup = ({ AccountName }) => {
       <Box className="LoginBox">
         <Box className="LoginUserImg">
           <img src={UserImg} alt="User" className="LoginImg" />
-          <Typography variant="h6" className="LoginUserImgName" gutterbottom>
+          <Typography variant="h6" className="LoginUserImgName" gutterBottom>
             {`${AccountName} Account`}
           </Typography>
         </Box>
@@ -185,23 +204,32 @@ const Signup = ({ AccountName }) => {
               (regex.test(userInput) || userInput === "") && setCnic(userInput);
             }}
           />
-          {/* <div className="file-input">
+          {/* Front side image input field */}
+          <div className="file-input">
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setFrontImage(e.target.files[0])}
+              onChange={(e) => {
+                onUpload(e, "front");
+                handleOpenPreview("front"); // Open preview for front side
+              }}
+              onClick={(e) => {
+                // setOpenPreview(true);
+              }}
             />
-            <label>Front CNIC</label>
-          </div> */}
-          {/* Back side image input field */}
-          {/* <div className="file-input">
+
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setBackImage(e.target.files[0])}
+              onChange={(e) => {
+                onUpload(e, "back");
+                handleOpenPreview("back"); // Open preview for back side
+              }}
+              onClick={(e) => {
+                // setOpenPreview(true);
+              }}
             />
-            <label>Back CNIC</label>
-          </div> */}
+          </div>
           <button
             className="login-button"
             type="button"
@@ -214,6 +242,26 @@ const Signup = ({ AccountName }) => {
           </Link>
         </Box>
       </Box>
+      {/* <Modal open={openPreview} onClose={() => setOpenPreview(false)}>
+        <div
+          className="modal"
+          sx={{
+            width: 300,
+            height: 300,
+
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: 24,
+            p: 2,
+          }}
+        >
+          <img
+            src={previewSide === "front" ? frontImageUrl : backImageUrl}
+            alt="Preview"
+            style={{ width: "20%", height: "20%", objectFit: "contain" }}
+          />
+        </div>
+      </Modal> */}
       <ToastContainer />
     </Box>
   );

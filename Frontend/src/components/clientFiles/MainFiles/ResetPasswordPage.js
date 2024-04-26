@@ -33,10 +33,12 @@ const ResetPasswordPage = ({ token }) => {
     }
 
     try {
+      // Extract the token from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
       const response = await axios.put(
-        "http://localhost:8080/api/resetPassword",
+        `http://localhost:8080/api/resetPassword/${token}`,
         {
-          token: localStorage.getItem("token"),
           newPassword,
         }
       );

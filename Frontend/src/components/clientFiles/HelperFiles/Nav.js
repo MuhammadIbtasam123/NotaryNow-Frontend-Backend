@@ -5,7 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import logoImg from "../../../assets/images/logo.png";
-import profilePic from "../../../assets/images/ibtasam-fyp.jpg";
+// import profilePic from "../../../assets/images/ibtasam-fyp.jpg";
 import { Button } from "@mui/material";
 import "./HelperStyle.css";
 
@@ -40,7 +40,7 @@ const Nav = ({ User }) => {
             >
               Sign Out
             </Button>
-            <img src={profilePic} alt="" className="profile-pic" />
+            {/* <img src={profilePic} alt="" className="profile-pic" /> */}
           </Box>
         </Toolbar>
       </Container>

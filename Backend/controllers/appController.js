@@ -5,7 +5,7 @@ import otpGenerator from "otp-generator";
 import { sendOTP } from "./mailer.js";
 import generateToken from "../helperFunctions/helper.js";
 import { sendRedirectLink } from "./resetMailer.js";
-
+import Document from "../model/Document.model.js";
 /** middleware for verify user */
 export async function verifyUser(req, res, next) {
   try {
@@ -30,7 +30,9 @@ export async function verifyUser(req, res, next) {
 }
 
 export async function signup(req, res) {
-  const { username, name, email, password, cnic } = req.body;
+  // console.log(req.body);
+  const { username, name, email, password, cnic, frontImage, backImage } =
+    req.body;
 
   try {
     // Check if the username or email already exists in the database
@@ -52,6 +54,8 @@ export async function signup(req, res) {
       email,
       password: await bcrypt.hash(password, 10),
       cnic,
+      cnicFront: frontImage,
+      cnicBack: backImage,
     });
 
     // Save the user to the database
@@ -102,7 +106,7 @@ export async function login(req, res) {
             email: user.dataValues.email,
           },
           process.env.JWT_SECRET,
-          { expiresIn: "1h" }
+          { expiresIn: "1d" }
         );
 
         // Send the token and a success message to the frontend
@@ -121,8 +125,13 @@ export async function login(req, res) {
 
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req, res) {
-  const { username } = req.params;
-  console.log(username);
+  // console.log(req.headers.authorization);
+
+  // verify the token from the user and extract info from it
+
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { username } = decoded;
 
   try {
     if (!username) return res.status(501).send({ error: "Invalid Username" });
@@ -139,13 +148,13 @@ export async function getUser(req, res) {
       return res.status(404).send({ error: "User not found" });
     }
 
-    console.log(user);
+    // console.log("User found: ", user.toJSON());
 
     /** remove password from user */
     // PostgreSQL return unnecessary data with object so convert it into json
     const { password, ...rest } = user.toJSON();
 
-    return res.status(201).send(rest);
+    return res.status(200).send(rest);
   } catch (error) {
     console.error("Error retrieving user data:", error);
     return res.status(500).send({ error: "Internal server error" });
@@ -163,22 +172,30 @@ body: {
 }
 */
 export async function updateUser(req, res) {
-  try {
-    console.log(req.user);
-    const { cnic } = req.user;
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { cnic } = decoded;
 
+  // console.log(token);
+  // console.log(decoded);
+  // console.log(req.body);
+  try {
     if (!cnic) {
       return res.status(401).send({ error: "User Not Found" });
     }
-
     const body = req.body; // Assuming body contains fields to be updated
-
     // Update the user data in the database
-    const [rowsUpdated, [updatedUser]] = await User.update(body, {
-      where: { cnic },
-      returning: true,
-    });
-
+    const [rowsUpdated, [updatedUser]] = await User.update(
+      {
+        address: body.address,
+        profileImage: body.selectedImage,
+        contact: body.contact,
+      },
+      {
+        where: { cnic },
+        returning: true,
+      }
+    );
     // Check if the user was updated successfully
     if (rowsUpdated === 1) {
       return res.status(200).send({
@@ -198,14 +215,7 @@ export async function updateUser(req, res) {
 
 /** GET: http://localhost:8080/api/generateOTP */
 export async function generateOTP(req, res) {
-  console.log(req.body);
-  // verify the token from the user and extract info from it
-  // const { token } = req.body;
-  // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  // console.log(decoded);
-
   const { email } = req.body;
-
   req.app.locals.OTP = await otpGenerator.generate(6, {
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
@@ -216,13 +226,11 @@ export async function generateOTP(req, res) {
     await sendOTP(email, req.app.locals.OTP);
   }
 }
-
 /** GET: http://localhost:8080/api/verifyOTP */
 export async function verifyOTP(req, res) {
   // getting back the otp from the user
   const { otp } = req.body;
   // comapring the otp with the generated otp
-
   if (parseInt(req.app.locals.OTP) === parseInt(otp)) {
     req.app.locals.OTP = null; // reset the OTP value
     return res.status(200).send({ msg: "OTP Verify Successsfully!" });
@@ -233,11 +241,7 @@ export async function verifyOTP(req, res) {
 
 /** PUT: http://localhost:8080/api/forgotPassword */
 export async function forgotPassword(req, res) {
-  // decode the token and extract the email from it
-  const { token } = req.body;
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  console.log(decoded.email);
-  const { email } = decoded;
+  const { email } = req.body;
 
   try {
     // Find the user by their email
@@ -251,7 +255,12 @@ export async function forgotPassword(req, res) {
 
     // gnerate new token and send redirect link to the user
     const token = generateToken();
-    sendRedirectLink(email, token);
+
+    // storing into loclal memory
+    req.app.locals.ResetToken = token;
+    req.app.locals.email = email;
+
+    await sendRedirectLink(email, token);
 
     return res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
@@ -262,13 +271,21 @@ export async function forgotPassword(req, res) {
 
 // Endpoint to handle password reset
 export const resetPassword = async (req, res) => {
-  // console.log(req.body);
-  const { token, newPassword } = req.body;
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const email = decoded.email;
-  console.log(decoded);
+  console.log(req.body);
+  console.log(req.params);
 
-  // Validate token and update user's password in your database (not implemented here)
+  // Parsing the token from URL params
+  const { token } = req.params;
+  const { newPassword } = req.body;
+  const email = req.app.locals.email;
+
+  console.log(token, req.app.locals.ResetToken);
+
+  // Check if the token is valid
+  if (token !== req.app.locals.ResetToken) {
+    return res.status(400).json({ message: "Invalid or expired token" });
+  }
+
   //  we have to update the password in the database
   const user = await User.findOne({
     where: { email },
@@ -290,4 +307,83 @@ export const resetPassword = async (req, res) => {
   );
 
   res.status(200).send("Password reset successfully");
+};
+
+// handle get document of users
+
+export const getDocuments = async (req, res) => {
+  try {
+    // Fetch all documents from the database
+    const documents = await Document.findAll();
+    res.status(200).json({ documents });
+  } catch (error) {
+    console.error(
+      `An error occurred while fetching documents: ${error.message}`
+    );
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
+// handle upload document
+
+export const uploadDocuments = async (req, res) => {
+  try {
+    // extract cnic from token
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { cnic } = decoded;
+
+    // Extract user ID and other metadata from the request body
+
+    // Extract the PDF file from the request
+    const pdfFile = req.file;
+    console.log(pdfFile);
+
+    // Check if the PDF file exists
+    if (!pdfFile) {
+      return res.status(400).json({ message: "PDF file is required." });
+    }
+
+    // Store the PDF file in the database
+    const document = await Document.create({
+      UserId: cnic, // Assuming userId is provided in the request body
+      documentFile: pdfFile.path,
+      documentName: pdfFile.originalname,
+    });
+
+    // Return a success response
+    return res
+      .status(201)
+      .json({ message: "PDF file uploaded successfully.", document });
+  } catch (error) {
+    console.error("Error uploading PDF file:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// handle delete document
+export const deleteDocument = async (req, res) => {
+  try {
+    // Extract the document ID from the request params
+    const { id } = req.params;
+
+    // Find the document by ID
+    const document = await Document.findByPk(id);
+
+    // Check if the document exists
+    if (!document) {
+      return res.status(404).json({ message: "Document not found." });
+    }
+
+    // Delete the document from the database
+    await document.destroy();
+
+    // Return a success response
+    return res.status(200).json({ message: "Document deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
 };
