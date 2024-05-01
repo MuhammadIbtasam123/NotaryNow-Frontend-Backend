@@ -59,11 +59,12 @@ const Signup = ({ AccountName }) => {
     )}`;
 
     try {
-      const response = await axios.post("http://localhost:3001/signup", {
+      const response = await axios.post("http://localhost:8080/api/notarysignup", {
+
         username: username,
         email: email,
         password: password,
-        confirmpassword: confirmpassword,
+        // confirmpassword: confirmpassword,
         cnic: cnicFormat,
       });
 
@@ -191,6 +192,6 @@ export default Signup;
 
 /*
 should be the path where server is hosted and listening to,  then /endpint work.
-endpoint: http://localhost:3001/signup
+endpoint: http://localhost:3001/notarysignup
 
 */

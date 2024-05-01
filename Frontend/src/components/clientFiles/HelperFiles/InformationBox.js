@@ -89,6 +89,18 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
       if (response.status === 200) {
         // Show a success toast message
         showToast("User data updated successfully!", "success");
+        const UserUpdatedData = response.data.user;
+        // console.log("UserUpdatedData", UserUpdatedData);
+        // Update the user data in the state
+        setPersonalInformationData([
+          UserUpdatedData.username,
+          UserUpdatedData.name,
+          UserUpdatedData.email,
+          UserUpdatedData.contact,
+          UserUpdatedData.address,
+          UserUpdatedData.cnic,
+        ]);
+        console.log(response.data);
         // Close the dialog
         setOpenDialog(false);
       } else {

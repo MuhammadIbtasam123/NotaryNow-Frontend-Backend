@@ -2,9 +2,9 @@ import User from "../model/User.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import otpGenerator from "otp-generator";
-import { sendOTP } from "./mailer.js";
+import { sendOTP } from "./userMailer.js";
 import generateToken from "../helperFunctions/helper.js";
-import { sendRedirectLink } from "./resetMailer.js";
+import { sendRedirectLink } from "./userResetMailer.js";
 import Document from "../model/Document.model.js";
 /** middleware for verify user */
 export async function verifyUser(req, res, next) {
@@ -30,7 +30,7 @@ export async function verifyUser(req, res, next) {
 }
 
 export async function signup(req, res) {
-  // console.log(req.body);
+  console.log(req.body);
   const { username, name, email, password, cnic, frontImage, backImage } =
     req.body;
 
@@ -312,17 +312,22 @@ export const resetPassword = async (req, res) => {
 // handle get document of users
 
 export const getDocuments = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  console.log(decoded);
+
   try {
-    // Fetch all documents from the database
-    const documents = await Document.findAll();
-    res.status(200).json({ documents });
+    // fetch all documents of user from database
+    const documents = await Document.findAll({
+      where: {
+        UserId: decoded.cnic,
+      },
+    });
+
+    return res.status(200).json({ documents });
   } catch (error) {
-    console.error(
-      `An error occurred while fetching documents: ${error.message}`
-    );
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
 
@@ -365,23 +370,30 @@ export const uploadDocuments = async (req, res) => {
 
 // handle delete document
 export const deleteDocument = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { cnic } = decoded;
+
   try {
     // Extract the document ID from the request params
     const { id } = req.params;
-
     // Find the document by ID
     const document = await Document.findByPk(id);
-
     // Check if the document exists
     if (!document) {
       return res.status(404).json({ message: "Document not found." });
     }
-
     // Delete the document from the database
     await document.destroy();
 
-    // Return a success response
-    return res.status(200).json({ message: "Document deleted successfully." });
+    // get all documents of user from database
+    const documents = await Document.findAll({
+      where: {
+        UserId: cnic,
+      },
+    });
+
+    return res.status(200).json({ documents });
   } catch (error) {
     console.error("Error deleting document:", error);
     return res.status(500).json({ message: "Internal server error." });
