@@ -12,18 +12,19 @@ Days.init(
     },
     day: {
       type: DataTypes.STRING(20),
-      allowNull: false,
+      allowNull: true,
     },
   },
   {
     sequelize,
     modelName: "Days",
+    schema: "public",
+    timestamps: false,
   }
 );
 
 // If the database table doesn't exist, Sequelize will create it
-Days.sync({
-  force: true,
-});
+
+Days.sync();
 
 export default Days;

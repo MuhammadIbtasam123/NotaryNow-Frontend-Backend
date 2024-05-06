@@ -5,13 +5,18 @@ import otpGenerator from "otp-generator";
 import { sendOTP } from "./userMailer.js";
 import generateToken from "../helperFunctions/helper.js";
 import { sendRedirectLink } from "./resetMailerNotary.js";
+import NotaryAvailability from "../model/NotaryAvailability.model.js"; // Import the NotaryAvailability model
+import DayTimes from "../model/DayTime.model.js"; // Import the DayTime model
+import Days from "../model/Days.model.js"; // Import the Days model
+import TimeSlots from "../model/TimeSlots.model.js";
+import { Op } from "sequelize";
 
 /** middleware for verify Notary */
 export async function verifyNotary(req, res, next) {
   try {
     const { notaryname } = req.method == "GET" ? req.query : req.body;
 
-    // check the user existance
+    // check the user existancecs
     let exist = await NotaryModel.findOne(
       {
         where: {
@@ -33,7 +38,7 @@ export async function verifyNotary(req, res, next) {
 
 export async function signupNotary(req, res) {
   console.log(req.body);
-  const { username, email, password, cnic } = req.body;
+  const { name, username, email, password, cnic } = req.body;
   try {
     // Check if the notary or email already exists in the database
     const existingNotary = await Notary.findOne({
@@ -49,6 +54,7 @@ export async function signupNotary(req, res) {
 
     // Create a new notary instance
     const newNotary = new Notary({
+      name,
       username,
       email,
       password: await bcrypt.hash(password, 10),
@@ -271,43 +277,107 @@ export const notaryresetPassword = async (req, res) => {
 
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getNotary(req, res) {
-  // console.log(req.headers.authorization);
-
   // verify the token from the user and extract info from it
-  console.log("INSIDE GET NOTARY");
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const { username } = decoded;
-  console.log("DECODED USERNAME FROM FRONTEND IS: ", username);
+
+  // extract the cnic from the token
+  const { cnic } = decoded;
 
   try {
-    if (!username) return res.status(501).send({ error: "Invalid Notaryname" });
-
-    // Find the user by username
+    // Find the user by cnic
     const user = await Notary.findOne({
       where: {
-        username,
+        cnic,
       },
     });
-
+    // console.log(user.dataValues);
     if (!user) {
-      console.log("User not found with username: ", username);
       return res.status(404).send({ error: "User not found" });
     }
 
-    console.log("USER INFO IS: ", user);
-
-    // console.log("User found: ", user.toJSON());
-
-    /** remove password from user */
     // PostgreSQL return unnecessary data with object so convert it into json
     const { password, ...rest } = user.toJSON();
-    console.log("REST DATA IS: ", rest);
-    console.log("JSON FORMAT DATA IS: ", user);
+    // console.log(rest);
 
     return res.status(200).send(rest);
   } catch (error) {
     console.error("Error retrieving user data:", error);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+}
+
+/* Availability form of Notary */
+
+export async function Availability(req, res) {
+  // Assuming you can extract the notary ID from the token
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { cnic } = decoded;
+  console.log(req.body);
+  const dataFromFrontend = req.body; // Assuming the data is sent in the request body
+  try {
+    const days = dataFromFrontend.map(async (day) => {
+      // find the id of day from Days table
+      const dayDataId = await Days.findOne({
+        where: {
+          day: day.day,
+        },
+      });
+      const dayId = dayDataId.dataValues.id;
+      // console.log(dayDataId.dataValues.id);
+
+      // need to fetch the ids of timeslots agaisnt each dayID from timeslots table
+      // want to get ids in between the start time and end time where we have seprate columns for start and end time
+      const timeSlots = await TimeSlots.findAll({
+        where: {
+          [Op.and]: [
+            { start_time: { [Op.gte]: day.startTime } },
+            { start_time: { [Op.lte]: day.endTime } },
+          ],
+        },
+      });
+      // sort the timeslots in ascending order
+      // console.log(timeSlots.map((slot) => slot.dataValues.id));
+
+      // console.log("These are days ids:");
+      // console.log(dayDataId.dataValues.id);
+      // console.log("These are timeslots ids against each day id:");
+      const timeSlotIds = timeSlots.map((slot) => slot.dataValues.id);
+      // console.log(timeSlotIds.sort((a, b) => a - b));
+
+      // now i have to retrieve the ids of daytimes against each day id and timeslot id
+      const dayTimes = await DayTimes.findAll({
+        where: {
+          day_id: dayId,
+          time_slot_id: timeSlotIds,
+        },
+      });
+      //console.log(dayTimes.map((dayTime) => dayTime.dataValues.id));
+      console.log(
+        "These are daytimes ids against each day id and timeslot id:"
+      );
+
+      const dayTimeIds = dayTimes.map((dayTime) => dayTime.dataValues.id);
+
+      // now i have to insert the data into NotaryAvailability table against each dayTime id
+      await Promise.all(
+        dayTimeIds.map(async (dayTimeId) => {
+          const newAvailability = new NotaryAvailability({
+            notaryId: cnic,
+            dayTimeId: dayTimeId,
+          });
+          return await newAvailability.save();
+        })
+      );
+    });
+
+    // Send a success response
+    res
+      .status(200)
+      .send({ message: "Notary availability updated successfully" });
+  } catch (error) {
+    console.error("Error updating notary availability:", error);
     return res.status(500).send({ error: "Internal server error" });
   }
 }

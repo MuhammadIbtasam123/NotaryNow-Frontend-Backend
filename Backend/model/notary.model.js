@@ -1,9 +1,9 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
 
-class Notary extends Model {}
+class Notaries extends Model {}
 
-Notary.init(
+Notaries.init(
   {
     username: {
       type: DataTypes.STRING,
@@ -12,8 +12,8 @@ Notary.init(
     name: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null, 
-    }, 
+      defaultValue: null,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -31,46 +31,42 @@ Notary.init(
     contact: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null, 
+      defaultValue: null,
     },
-    Nofification_No: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      defaultValue: null, 
-    },
+
     Seal_Issue: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null, 
+      defaultValue: null,
     },
     Expiry_data: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null, 
+      defaultValue: null,
     },
     address: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null, 
+      defaultValue: null,
     },
     license: {
       type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: null, 
+      defaultValue: null,
     },
     profileImage: {
       type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: null, 
+      defaultValue: null,
     },
   },
   {
     sequelize,
-    modelName: "Notary",
+    modelName: "Notaries",
   }
 );
 
 // if database is not there
-Notary.sync();
+Notaries.sync();
 
-export default Notary;
+export default Notaries;

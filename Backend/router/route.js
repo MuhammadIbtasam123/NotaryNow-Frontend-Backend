@@ -55,3 +55,5 @@ router.route("/notaryforgotPassword").put(Ncontroller.notrayforgotPassword); // 
 router
   .route("/notaryresetPassword/:token")
   .put(Ncontroller.notaryresetPassword); // use to reset password for notary
+
+router.route("/AvailabilityForm").post(Auth, Ncontroller.Availability); // set the availability of notary

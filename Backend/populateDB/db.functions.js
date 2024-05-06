@@ -1,13 +1,19 @@
-// import Days from "../model/Days.model.js"; // Import the Days model
-// import TimeSlots from "../model/TimeSlots.model.js"; // Import the TimeSlots model
-// import DayTime from "../model/DayTime.model.js"; // Import the DayTime model
+// import sequelize from "../database/config.js";
+// import Days from "../model/Days.model.js";
+// import TimeSlots from "../model/TimeSlots.model.js";
+// import DayTime from "../model/DayTime.model.js";
 
 // // Function to populate the Days table
 // const populateDays = async () => {
 //   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 //   try {
+//     await Days.sync();
 //     for (const day of days) {
-//       await Days.create({ day });
+//       // Execute raw SQL INSERT query using Sequelize's query() method
+//       await sequelize.query('INSERT INTO "Days" ("day") VALUES (:day)', {
+//         replacements: { day },
+//         type: sequelize.QueryTypes.INSERT,
+//       });
 //     }
 //     console.log("Days table populated successfully.");
 //   } catch (error) {
@@ -18,6 +24,7 @@
 // // Function to populate the TimeSlots table
 // const populateTimeSlots = async () => {
 //   try {
+//     await TimeSlots.sync();
 //     const startTime = new Date();
 //     startTime.setHours(9, 0, 0); // Set start time to 09:00:00
 //     const endTime = new Date();
@@ -46,9 +53,12 @@
 //   }
 // };
 
+// // export { populateDays, populateTimeSlots };
+
 // // Function to populate the DayTime table
 // const populateDayTime = async () => {
 //   try {
+//     // await DayTime.sync();
 //     const days = await Days.findAll();
 //     const timeSlots = await TimeSlots.findAll();
 
@@ -66,4 +76,5 @@
 //   }
 // };
 
-// export { populateDays, populateTimeSlots, populateDayTime };
+// export { populateTimeSlots, populateDays };
+// export { populateDayTime };

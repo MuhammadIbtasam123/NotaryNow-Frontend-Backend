@@ -1,7 +1,7 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
-class TimeSlots extends Model {}
 
+class TimeSlots extends Model {}
 TimeSlots.init(
   {
     id: {
@@ -13,20 +13,16 @@ TimeSlots.init(
       type: DataTypes.TIME,
       allowNull: false,
     },
-    end_time: {
-      type: DataTypes.TIME,
-      allowNull: false,
-    },
   },
   {
     sequelize,
     modelName: "TimeSlots",
+    timestamps: false,
+    // schema: "public",
   }
 );
 
 // If the database table doesn't exist, Sequelize will create it
-TimeSlots.sync({
-  force: true,
-});
+TimeSlots.sync();
 
 export default TimeSlots;

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -17,7 +18,6 @@ const AvailabilityForm = () => {
     { day: "Wednesday", available: false, startTime: "", endTime: "" },
     { day: "Thursday", available: false, startTime: "", endTime: "" },
     { day: "Friday", available: false, startTime: "", endTime: "" },
-    { day: "Saturday", available: false, startTime: "", endTime: "" },
   ]);
 
   const handleAvailabilityChange = (index) => (event) => {
@@ -38,9 +38,20 @@ const AvailabilityForm = () => {
     setAvailability(newAvailability);
   };
 
-  const handleSubmit = () => {
-    // Handle form submission here
+  const handleSubmit = async () => {
     console.log(availability);
+
+    // axios to be used here
+    const response = await axios.post(
+      "http://localhost:8080/api/AvailabilityForm",
+      availability,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    console.log(response.data);
   };
 
   return (

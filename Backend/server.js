@@ -2,12 +2,10 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import router from "./router/route.js";
-// import {
-//   populateDays,
-//   populateTimeSlots,
-//   populateDayTime,
-// } from "./populateDB/db.functions.js";
-
+import Days from "./model/Days.model.js";
+import TimeSlots from "./model/TimeSlots.model.js";
+import DayTimes from "./model/DayTime.model.js";
+import NotaryAvailability from "./model/NotaryAvailability.model.js";
 const app = express();
 
 /** middlewares */
@@ -24,11 +22,12 @@ app.disable("x-powered-by"); // less hackers know about our
 
 const port = 8080;
 
-// // Populate Days table
-// populateDays()
-//   .then(() => populateTimeSlots())
-//   .then(() => populateDayTime())
-//   .catch((error) => console.error("Error:", error));
+// If the database table doesn't exist, Sequelize will create it
+
+Days.sync();
+TimeSlots.sync();
+DayTimes.sync();
+NotaryAvailability.sync();
 
 /** HTTP GET Request */
 app.get("/", (req, res) => {

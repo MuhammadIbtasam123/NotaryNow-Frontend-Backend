@@ -1,8 +1,8 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
-class DayTime extends Model {}
+class DayTimes extends Model {}
 
-DayTime.init(
+DayTimes.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -28,13 +28,11 @@ DayTime.init(
   },
   {
     sequelize,
-    modelName: "DayTime",
+    modelName: "DayTimes",
   }
 );
 
 // If the database table doesn't exist, Sequelize will create it
-DayTime.sync({
-  force: true,
-});
+DayTimes.sync();
 
-export default DayTime;
+export default DayTimes;

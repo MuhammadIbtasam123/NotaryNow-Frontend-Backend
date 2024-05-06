@@ -11,23 +11,21 @@ import "react-toastify/dist/ReactToastify.css";
 import { useHistory } from "react-router-dom";
 import "./HelperStyle.css";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
-import convertToBase64 from "../HelperFunctions/helperFunctions.js"
+import convertToBase64 from "../HelperFunctions/helperFunctions.js";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Dialog from "@mui/material/Dialog";
 
-
-const InformationBox = ({selectedImage, setSelectedImage}) => {
-
+const InformationBox = ({ selectedImage, setSelectedImage }) => {
   const PersonalInforamtionAttributes = [
     "Name", // initial
     "Contact", // initial
-    "Email",  // initial
+    "Email", // initial
     "Address",
     "CNIC", //initial
-    "UserName", 
+    "UserName",
     "NotificationNo", // Added attribute
     "Seal-Issue", // Added attribute
     "ExpiryDate", // Added attribute
@@ -37,8 +35,8 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
   const [username, setUserName] = useState("");
   const [address, setAddress] = useState("");
   const [contact, setContact] = useState("");
-  const [NotificationNo ,setNotificationNo] = useState("");
-  const [SealIssue , setSealIssue] = useState("");
+  const [NotificationNo, setNotificationNo] = useState("");
+  const [SealIssue, setSealIssue] = useState("");
   const [ExpiryDate, setExpiryDate] = useState("");
   const [PersonalInformationData, setPersonalInformationData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -83,7 +81,7 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
         "SealIssue:",
         SealIssue,
         "ExpiryDate:",
-        ExpiryDate,
+        ExpiryDate
         // "Image:",
         // selectedImage
       );
@@ -110,6 +108,21 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
 
       // Check the response status
       if (response.status === 200) {
+        //set new updated data
+        const UserUpdatedData = response.data.user;
+        // Update the user data in the state
+        setPersonalInformationData([
+          UserUpdatedData.name,
+          UserUpdatedData.contact,
+          UserUpdatedData.email,
+          UserUpdatedData.address,
+          UserUpdatedData.cnic,
+          UserUpdatedData.username,
+          UserUpdatedData.NotificationNo,
+          UserUpdatedData.SealIssue,
+          UserUpdatedData.ExpiryDate,
+        ]);
+        setSelectedImage(UserUpdatedData.profileImage);
         // Show a success toast message
         showToast("notary data updated successfully!", "success");
         // Close the dialog
@@ -129,29 +142,24 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
   };
 
   useEffect(() => {
-    // Define an asynchronous function inside the useEffect
     const fetchData = async () => {
       try {
-        // Fetch user data from the backend
         const response = await axios.get("http://localhost:8080/api/notary", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
 
-        console.log("RESPONSE RECEIVED ON FRONTEND: ", response.data);
-
-        // Check the response status
         if (response.status === 200) {
           // Extract the user data from the response
           const userData = response.data;
           const personalData = [
-            userData.username,
             userData.name,
-            userData.email,
             userData.contact,
+            userData.email,
             userData.address,
             userData.cnic,
+            userData.name, //username
             userData.NotificationNo,
             userData.SealIssue,
             userData.ExpiryDate,
@@ -159,8 +167,9 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
           setSelectedImage(userData.profileImage);
           // Update the state with the user data
           setPersonalInformationData(personalData);
+          // setSelectedImage(userData.profileImage);
         } else {
-          // Handle unsuccessful response (e.g., user not found)
+          // Handle unsuccessful response
           showToast(
             "Failed to fetch notary data. Please try again later!",
             "error"
@@ -173,19 +182,30 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
       }
     };
 
-    // Immediately invoke the asynchronous function
+    // Fetch data when the component mounts
     fetchData();
-  }, []); // Empty dependency array to run the effect only once
+  }, []);
 
   return (
     <Box className="information-box">
-      <Box className="information-box-heading">
+      <Box
+        className="information-box-heading"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography className="information-header">
           Personal Information
         </Typography>
         <ModeEditOutlineOutlinedIcon
           className="information-box-edit"
           onClick={handleEdit}
+          style={{
+            marginRight: "1rem",
+          }}
         />
       </Box>
       <Grid container className="information-grid">
@@ -269,15 +289,7 @@ const InformationBox = ({selectedImage, setSelectedImage}) => {
             value={contact}
             onChange={(event) => setContact(event.target.value)}
           />
-          <TextField
-            sx={{
-              marginTop: "2rem",
-            }}
-            label=""
-            defaultValue={PersonalInformationData[3]}
-            value={contact}
-            onChange={(event) => setContact(event.target.value)}
-          />
+
           {/* field to browse image */}
           <Button
             sx={{

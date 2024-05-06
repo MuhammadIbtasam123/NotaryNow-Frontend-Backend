@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Signup = ({ AccountName }) => {
   // Dynamic states for input fields
+  const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +38,14 @@ const Signup = ({ AccountName }) => {
   const handleRegister = async (e) => {
     e.preventDefault();
     // Check if any field is empty
-    if (!username || !email || !password || !confirmpassword || !cnic) {
+    if (
+      !name ||
+      !username ||
+      !email ||
+      !password ||
+      !confirmpassword ||
+      !cnic
+    ) {
       showToast("Please fill all the fields", "error");
       return;
     }
@@ -59,14 +67,17 @@ const Signup = ({ AccountName }) => {
     )}`;
 
     try {
-      const response = await axios.post("http://localhost:8080/api/notarysignup", {
-
-        username: username,
-        email: email,
-        password: password,
-        // confirmpassword: confirmpassword,
-        cnic: cnicFormat,
-      });
+      const response = await axios.post(
+        "http://localhost:8080/api/notarysignup",
+        {
+          name: name,
+          username: username,
+          email: email,
+          password: password,
+          // confirmpassword: confirmpassword,
+          cnic: cnicFormat,
+        }
+      );
 
       if (response.status === 200) {
         showToast("Signup Successful!", "success");
@@ -102,6 +113,18 @@ const Signup = ({ AccountName }) => {
           <Typography gutterBottom variant="h5">
             Sign Up
           </Typography>
+          {/* Username */}
+          <input
+            id="name"
+            type="text"
+            placeholder="name"
+            className="text-field"
+            name="username"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+          />
           {/* Username */}
           <input
             id="username"
