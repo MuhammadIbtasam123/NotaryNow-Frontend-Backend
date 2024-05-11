@@ -6,6 +6,7 @@ Backend/node_modules
 ElectronDesktop/node_modules
 Frontend/.env
 Backend/.env
+Backend/public/images
 /.pnp
 .pnp.js
 
