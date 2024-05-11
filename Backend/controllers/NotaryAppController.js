@@ -6,9 +6,9 @@ import { sendOTP } from "./userMailer.js";
 import generateToken from "../helperFunctions/helper.js";
 import { sendRedirectLink } from "./resetMailerNotary.js";
 import NotaryAvailability from "../model/NotaryAvailability.model.js"; // Import the NotaryAvailability model
-import DayTimes from "../model/DayTime.model.js"; // Import the DayTime model
 import Days from "../model/Days.model.js"; // Import the Days model
 import TimeSlots from "../model/TimeSlots.model.js";
+import DayTimes from "../model/DayTime.model.js"; // Import the DayTime model
 import { Op } from "sequelize";
 
 /** middleware for verify Notary */
@@ -55,7 +55,7 @@ export async function signupNotary(req, res) {
     // Create a new notary instance
     const newNotary = new Notary({
       name,
-      username,
+      notary_name: username,
       email,
       password: await bcrypt.hash(password, 10),
       cnic,
@@ -381,3 +381,208 @@ export async function Availability(req, res) {
     return res.status(500).send({ error: "Internal server error" });
   }
 }
+
+// Endpoint to get the availability of a notary
+
+export const getAvailability = async (req, res) => {
+  // Assuming you can extract the notary ID from the token
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { cnic } = decoded;
+
+  try {
+    // first getting the notary id and dateTime id from NotaryAvailability table on basis of notary cnic.
+    const notaryAvailability = await NotaryAvailability.findAll({
+      where: {
+        notaryId: cnic,
+      },
+    });
+
+    // sort by dayTimeId and only see notaryId and dayTimeId
+    const sortedAvailability = notaryAvailability.map((availability) => ({
+      notaryId: availability.dataValues.notaryId,
+      dayTimeId: availability.dataValues.dayTimeId,
+    }));
+
+    // now we have day time id - want to fetch day id  using dayTimeId from db
+    // dayTimeSlots is an array of objects containing dayTimeId and dayId
+    const DayTimeSlots = await DayTimes.findAll({
+      where: {
+        id: sortedAvailability.map((availability) => availability.dayTimeId),
+      },
+    });
+
+    // WANT TO GET ONLY DAY ID AND DAY TIME ID
+    const dayTimeSlots = DayTimeSlots.map((dayTimeSlot) => ({
+      dayId: dayTimeSlot.dataValues.day_id,
+      timeSlotId: dayTimeSlot.dataValues.time_slot_id,
+    }));
+    console.log(dayTimeSlots);
+
+    // now we have day id - want to fetch day name using dayId from db
+    const days = await Days.findAll({
+      where: {
+        id: dayTimeSlots.map((dayTimeSlot) => dayTimeSlot.dayId),
+      },
+    });
+
+    console.log(days.map((day) => day.dataValues.day));
+
+    //  loop over array
+    //  for all those object where day id is same, get the first and the last time slot id against that day id.
+    // do this for all objects in the array
+
+    const dayTimeSlotsWithDay = await Promise.all(
+      days.map(async (day) => {
+        const dayId = day.dataValues.id;
+        const dayName = day.dataValues.day;
+        const timeSlots = dayTimeSlots
+          .filter((dayTimeSlot) => dayTimeSlot.dayId === dayId)
+          .map((dayTimeSlot) => dayTimeSlot.timeSlotId);
+        const startTime = await TimeSlots.findOne({
+          where: { id: Math.min(...timeSlots) },
+        });
+        const endTime = await TimeSlots.findOne({
+          where: { id: Math.max(...timeSlots) },
+        });
+        return {
+          day: dayName,
+          startTime: startTime.start_time,
+          endTime: endTime.start_time,
+        };
+      })
+    );
+
+    // do a bit modification of end time if it is greater than 12 and add AM/PM format 10:00 AM | 10:00 PM
+    dayTimeSlotsWithDay.forEach((day) => {
+      const startTime = day.startTime.split(":");
+      const endTime = day.endTime.split(":");
+      if (parseInt(startTime[0]) > 12) {
+        startTime[0] = (parseInt(startTime[0]) - 12).toString();
+        day.startTime = `${startTime.join(":")} PM`;
+      } else {
+        day.startTime = `${startTime.join(":")} AM`;
+      }
+      if (parseInt(endTime[0]) > 12) {
+        endTime[0] = (parseInt(endTime[0]) - 12).toString();
+        day.endTime = `${endTime.join(":")} PM`;
+      } else {
+        day.endTime = `${endTime.join(":")} AM`;
+      }
+    });
+
+    // console.log(dayTimeSlotsWithDay);
+    return res.status(200).send(dayTimeSlotsWithDay);
+  } catch (error) {
+    console.error("Error retrieving notary availability:", error);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+};
+
+// Endpoint to edit the availability of a notary
+
+export const editAvailability = async (req, res) => {
+  // Assuming you can extract the notary ID from the token
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { cnic } = decoded;
+
+  try {
+    const data = req.body; // Assuming the data is sent in the request body
+    console.log(data);
+
+    if (!data) {
+      return res.status(400).send({ error: "No data received" });
+    }
+
+    const resultToEdit = data.filter((object) => {
+      return object.available === true;
+    });
+
+    console.log(resultToEdit);
+
+    // seprate the day and time from the resultToEdit array
+    const day = resultToEdit.map((day) => day.day);
+    const startTime = resultToEdit.map((day) => day.startTime);
+    const endTime = resultToEdit.map((day) => day.endTime);
+
+    console.log(day, startTime, endTime);
+
+    // get the day id from the Days table
+    const dayId = await Days.findOne({
+      where: {
+        day: day,
+      },
+    });
+
+    console.log(dayId.dataValues.id);
+
+    // embed :00 at end of start time and end time
+    const startTimeEmbed = `${startTime}:00`;
+    const endTimeEmbed = `${endTime}:00`;
+
+    // get the time slot ids as array from the TimeSlots table from start time and end time
+    const timeSlots = await TimeSlots.findAll({
+      where: {
+        [Op.and]: [
+          { start_time: { [Op.gte]: startTimeEmbed } },
+          { start_time: { [Op.lte]: endTimeEmbed } },
+        ],
+      },
+    });
+
+    console.log(timeSlots.map((slot) => slot.dataValues.id));
+
+    // now we have to get daytime id from DayTimes table against each day id and time slot id
+    const dayTimes = await DayTimes.findAll({
+      where: {
+        day_id: dayId.dataValues.id,
+        time_slot_id: timeSlots.map((slot) => slot.dataValues.id),
+      },
+    });
+
+    const daytimeEq1 = dayTimes.map((dayTime) => dayTime.dataValues.id); // equation 1
+
+    // fetch all the timeslots ids from timeSlots table
+    const allTimeSlots = await TimeSlots.findAll();
+    const allTimeSlotsArray = allTimeSlots.map((slot) => slot.dataValues.id);
+
+    //fetch all the daytimes ids from DayTimes table using dayid and all timeslots ids
+    const allDayTimes = await DayTimes.findAll({
+      where: {
+        day_id: dayId.dataValues.id,
+        time_slot_id: allTimeSlotsArray,
+      },
+    });
+
+    const daytimeEq2 = allDayTimes.map((dayTime) => dayTime.dataValues.id); // equation 2
+    console.log(daytimeEq1);
+    console.log(daytimeEq2);
+    // remove all the data from NotaryAvailability table against those day time ids and notary ids
+    await NotaryAvailability.destroy({
+      where: {
+        notaryId: cnic,
+        dayTimeId: daytimeEq2,
+      },
+    });
+
+    // insert the data into NotaryAvailability table against each dayTime id
+    const updatedData = await Promise.all(
+      daytimeEq1.map(async (dayTimeId) => {
+        const newAvailability = new NotaryAvailability({
+          notaryId: cnic,
+          dayTimeId: dayTimeId,
+        });
+        return await newAvailability.save();
+      })
+    );
+
+    // Send a success response
+    res
+      .status(200)
+      .send({ message: "Notary availability updated successfully" });
+  } catch (error) {
+    console.error("Error updating notary availability:", error);
+    return res.status(500).send({ error: "Internal server error" });
+  }
+};

@@ -5,7 +5,7 @@ class Notaries extends Model {}
 
 Notaries.init(
   {
-    username: {
+    notary_name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -56,6 +56,16 @@ Notaries.init(
     },
     profileImage: {
       type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: null,
+    },
+    price: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null,
+    },
+    totalDocNotarized: {
+      type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: null,
     },

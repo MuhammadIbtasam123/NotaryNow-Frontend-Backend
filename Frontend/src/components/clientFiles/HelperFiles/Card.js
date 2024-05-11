@@ -1,9 +1,10 @@
-import * as React from 'react';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardMedia from '@mui/material/CardMedia';
-import Typography from '@mui/material/Typography';
-import './HelperStyle.css';
+import * as React from "react";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Typography from "@mui/material/Typography";
+import "./HelperStyle.css";
+import { Link } from "react-router-dom";
 
 const CardComponent = ({ notariesInformation }) => {
   return (
@@ -18,9 +19,11 @@ const CardComponent = ({ notariesInformation }) => {
           />
 
           <CardContent className="cardContentSimple">
-            <Typography variant="h6" className="cardTextWhiteSimple">
-              {notary.notaryName}
-            </Typography>
+            <Link to="/User/Create-Appointments/Book-Appointments/:{notary.id}">
+              <Typography variant="h6" className="cardTextWhiteSimple">
+                {notary.notaryName}
+              </Typography>
+            </Link>
             <Typography variant="subtitle2" className="cardTextWhiteSimple">
               {notary.address}
             </Typography>
@@ -29,7 +32,11 @@ const CardComponent = ({ notariesInformation }) => {
             </Typography>
           </CardContent>
 
-          <Typography variant="subtitle1" className="cardTextWhiteSimple" component="div">
+          <Typography
+            variant="subtitle1"
+            className="cardTextWhiteSimple"
+            component="div"
+          >
             {notary.amount}
           </Typography>
         </Card>

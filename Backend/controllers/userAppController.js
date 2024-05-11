@@ -1,4 +1,5 @@
 import User from "../model/User.model.js";
+import Notary from "../model/notary.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import otpGenerator from "otp-generator";
@@ -396,6 +397,33 @@ export const deleteDocument = async (req, res) => {
     return res.status(200).json({ documents });
   } catch (error) {
     console.error("Error deleting document:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+// handle get notaries
+
+export const getNotaries = async (req, res) => {
+  try {
+    // Fetch all notaries from the database
+    const notaries = await Notary.findAll();
+
+    // filter out data from notaries to show to the user
+    const filteredNotaries = notaries.map((notary) => {
+      const { id, notary_name, address, profileImage } = notary;
+      return {
+        id,
+        image: profileImage,
+        notaryName: notary_name,
+        address,
+        totalDocNotarized: 30,
+        amount: "Rs. 200",
+      };
+    });
+
+    return res.status(200).json({ notaries: filteredNotaries });
+  } catch (error) {
+    console.error("Error fetching notaries:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 };

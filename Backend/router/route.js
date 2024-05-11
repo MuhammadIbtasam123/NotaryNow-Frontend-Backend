@@ -36,7 +36,7 @@ router.route("/deleteDocument/:id").delete(Auth, controller.deleteDocument); // 
 router.route("/updateUser").put(Auth, controller.updateUser); // is use to update the user profile
 router.route("/forgotPassword").put(controller.forgotPassword); // use to reset password
 router.route("/resetPassword/:token").put(controller.resetPassword); // use to reset password
-export default router;
+router.route("/getNotaries").get(controller.getNotaries); // get all notaries
 
 /* Notary Methods */
 
@@ -57,3 +57,8 @@ router
   .put(Ncontroller.notaryresetPassword); // use to reset password for notary
 
 router.route("/AvailabilityForm").post(Auth, Ncontroller.Availability); // set the availability of notary
+router.route("/NotaryAvailability").get(Auth, Ncontroller.getAvailability); // get the availability of notary
+router
+  .route("/EditNotaryAvailability")
+  .patch(Auth, Ncontroller.editAvailability); // edit the availability of notary
+export default router;

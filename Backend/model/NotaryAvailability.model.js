@@ -1,6 +1,7 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
-
+import Notaries from "./notary.model.js";
+import DayTimes from "./dayTime.model.js";
 class NotaryAvailability extends Model {}
 
 NotaryAvailability.init(

@@ -120,7 +120,7 @@ const User = () => {
                 />
                 <Route
                   exact
-                  path="/User/Create-Appointments/Book-Appointments"
+                  path="/User/Create-Appointments/Book-Appointments/:id"
                   component={BookAppointment}
                 />
                 <Route

@@ -1,20 +1,19 @@
-import { Box } from '@mui/material';
-import Button from '@mui/material/Button';
-import React from 'react';
-import './HelperStyle.css';
+import { Box } from "@mui/material";
+import Button from "@mui/material/Button";
+import React from "react";
+import "./HelperStyle.css";
 
-const Filter = () => {
+const Filter = ({ setFilterData }) => {
   return (
     <Box>
       <form className="filter-form" action="">
         <input
           type="text"
-          placeholder='Search...'
+          placeholder="Search..."
           className="filter-input"
+          onChange={(e) => setFilterData(e.target.value)}
         />
-        <Button className="filter-button">
-          Search
-        </Button>
+        <Button className="filter-button">Search</Button>
       </form>
     </Box>
   );

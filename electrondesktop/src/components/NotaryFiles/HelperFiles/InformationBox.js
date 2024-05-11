@@ -117,7 +117,7 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
           UserUpdatedData.email,
           UserUpdatedData.address,
           UserUpdatedData.cnic,
-          UserUpdatedData.username,
+          UserUpdatedData.notary_name,
           UserUpdatedData.NotificationNo,
           UserUpdatedData.SealIssue,
           UserUpdatedData.ExpiryDate,
@@ -159,7 +159,7 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
             userData.email,
             userData.address,
             userData.cnic,
-            userData.name, //username
+            userData.notary_name,
             userData.NotificationNo,
             userData.SealIssue,
             userData.ExpiryDate,
@@ -244,7 +244,7 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
             )}
           </Grid>
 
-          <Grid xs={6}>
+          <Grid xs={8}>
             {PersonalInformationData.map(
               (element, index) =>
                 index % 2 !== 0 && (

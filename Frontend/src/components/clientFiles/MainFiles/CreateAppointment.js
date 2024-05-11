@@ -1,42 +1,37 @@
-import React from 'react';
-import { Box } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import CardComponent from '../HelperFiles/Card';
-import Filter from '../HelperFiles/Filter';
-import ibtasamImg from '../../../assets/images/ibtasam-fyp.jpg';
-import usiadImg from '../../../assets/images/usaid.png';
-import './mainFiles.css';
-
-const notariesInformation = [
-  {
-    id: 1,
-    image: ibtasamImg,
-    notaryName: 'A.Nawaz Osmani Law Associates',
-    address: '2-Model Town, Lahore.',
-    totalDocNotarized: 50,
-    amount: 'Rs. 250'
-  },
-  {
-    id: 2,
-    image: usiadImg,
-    notaryName: 'XYZ Law Firm',
-    address: '5-Downtown, Karachi.',
-    totalDocNotarized: 30,
-    amount: 'Rs. 200'
-  },
-  {
-    id: 3,
-    image: ibtasamImg,
-    notaryName: 'ABC Legal Services',
-    address: '8-Civil Lines, Islamabad.',
-    totalDocNotarized: 40,
-    amount: 'Rs. 300'
-  }
-];
+import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import CardComponent from "../HelperFiles/Card";
+import Filter from "../HelperFiles/Filter";
+import axios from "axios";
+import "./mainFiles.css";
 
 const CreateAppointment = () => {
+  const [notariesInformation, setNotariesInformation] = useState([]);
+  const [filterData, setFilterData] = useState("");
+
+  useEffect(() => {
+    const fetchNoaries = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/getNotaries",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        // console.log(response.data.notaries);
+        setNotariesInformation(response.data.notaries);
+      } catch (error) {
+        console.error("Error fetching availability:", error);
+      }
+    };
+
+    fetchNoaries();
+  }, [notariesInformation]);
   return (
-    <Box >
+    <Box>
       <Box className="headerSection">
         <Typography variant="h5" className="title">
           Create Appointment
@@ -47,8 +42,19 @@ const CreateAppointment = () => {
       </Box>
 
       <Box className="createAppointmentContainer">
-        <Filter />
-        <CardComponent notariesInformation={notariesInformation} />
+        <Filter setFilterData={setFilterData} />
+        <CardComponent
+          notariesInformation={notariesInformation.filter((object) => {
+            if (
+              object.notaryName.toLowerCase().includes(filterData.toLowerCase())
+            ) {
+              return object;
+            }
+            return null; // Add this line to return a value if the condition is not met
+          })}
+          setNotariesInformation={setNotariesInformation}
+          filterData={filterData}
+        />
       </Box>
     </Box>
   );

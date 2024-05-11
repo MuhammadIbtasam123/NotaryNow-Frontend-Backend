@@ -129,7 +129,7 @@ const Signup = ({ AccountName }) => {
           <input
             id="username"
             type="text"
-            placeholder="Username"
+            placeholder="Notary_name"
             className="text-field"
             name="username"
             value={username}
