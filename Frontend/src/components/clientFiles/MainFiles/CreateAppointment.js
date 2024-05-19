@@ -21,7 +21,7 @@ const CreateAppointment = () => {
             },
           }
         );
-        // console.log(response.data.notaries);
+        console.log(response.data.notaries);
         setNotariesInformation(response.data.notaries);
       } catch (error) {
         console.error("Error fetching availability:", error);
@@ -29,7 +29,7 @@ const CreateAppointment = () => {
     };
 
     fetchNoaries();
-  }, [notariesInformation]);
+  }, []);
   return (
     <Box>
       <Box className="headerSection">

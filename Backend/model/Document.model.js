@@ -1,6 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
-import User from "../model/User.model.js"; // Import the User model
+import User from "../model/user.model.js"; // Import the User model
 
 class Document extends Model {}
 

@@ -4,8 +4,9 @@ import morgan from "morgan";
 import router from "./router/route.js";
 import Days from "./model/Days.model.js";
 import TimeSlots from "./model/TimeSlots.model.js";
-import DayTimes from "./model/DayTime.model.js";
-import NotaryAvailability from "./model/NotaryAvailability.model.js";
+import DayTimes from "./model/dayTime.model.js";
+import NotaryAvailability from "./model/notaryAvailability.model.js";
+import Appointment from "./model/Appointment.model.js";
 const app = express();
 
 /** middlewares */
@@ -28,6 +29,7 @@ Days.sync();
 TimeSlots.sync();
 DayTimes.sync();
 NotaryAvailability.sync();
+Appointment.sync();
 
 /** HTTP GET Request */
 app.get("/", (req, res) => {

@@ -37,6 +37,11 @@ router.route("/updateUser").put(Auth, controller.updateUser); // is use to updat
 router.route("/forgotPassword").put(controller.forgotPassword); // use to reset password
 router.route("/resetPassword/:token").put(controller.resetPassword); // use to reset password
 router.route("/getNotaries").get(controller.getNotaries); // get all notaries
+router.route("/getNotaries/:id").get(controller.getSpecificNotary);
+
+/** Appointment Methods */
+
+router.route("/createAppointment").post(Auth, controller.createAppointment); // create appointment
 
 /* Notary Methods */
 

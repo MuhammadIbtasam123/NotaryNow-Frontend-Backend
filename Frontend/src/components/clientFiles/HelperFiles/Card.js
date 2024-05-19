@@ -10,7 +10,7 @@ const CardComponent = ({ notariesInformation }) => {
   return (
     <>
       {notariesInformation.map((notary) => (
-        <Card key={notary.id} className="cardContainerSimple">
+        <Card key={notary.cnic} className="cardContainerSimple">
           <CardMedia
             component="img"
             className="cardMediaSimple"
@@ -19,7 +19,9 @@ const CardComponent = ({ notariesInformation }) => {
           />
 
           <CardContent className="cardContentSimple">
-            <Link to="/User/Create-Appointments/Book-Appointments/:{notary.id}">
+            <Link
+              to={`/User/Create-Appointments/Book-Appointments/${notary.cnic}`}
+            >
               <Typography variant="h6" className="cardTextWhiteSimple">
                 {notary.notaryName}
               </Typography>

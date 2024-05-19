@@ -103,10 +103,6 @@ const Signup = ({ AccountName }) => {
     }
   };
 
-  const handleOpenPreview = (side) => {
-    // setPreviewSide(side); // Set the side being previewed
-    // setOpenPreview(true);
-  };
   useEffect(() => {
     let timer;
     if (showToastFlag) {
@@ -211,7 +207,6 @@ const Signup = ({ AccountName }) => {
               accept="image/*"
               onChange={(e) => {
                 onUpload(e, "front");
-                handleOpenPreview("front"); // Open preview for front side
               }}
               onClick={(e) => {
                 // setOpenPreview(true);
@@ -223,7 +218,6 @@ const Signup = ({ AccountName }) => {
               accept="image/*"
               onChange={(e) => {
                 onUpload(e, "back");
-                handleOpenPreview("back"); // Open preview for back side
               }}
               onClick={(e) => {
                 // setOpenPreview(true);

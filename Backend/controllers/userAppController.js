@@ -1,4 +1,4 @@
-import User from "../model/User.model.js";
+import User from "../model/user.model.js";
 import Notary from "../model/notary.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -7,6 +7,11 @@ import { sendOTP } from "./userMailer.js";
 import generateToken from "../helperFunctions/helper.js";
 import { sendRedirectLink } from "./userResetMailer.js";
 import Document from "../model/Document.model.js";
+import NotaryAvailability from "../model/notaryAvailability.model.js";
+import Appointment from "../model/Appointment.model.js";
+import DayTimes from "../model/dayTime.model.js";
+import Days from "../model/Days.model.js";
+import TimeSlots from "../model/TimeSlots.model.js";
 /** middleware for verify user */
 export async function verifyUser(req, res, next) {
   try {
@@ -407,12 +412,14 @@ export const getNotaries = async (req, res) => {
   try {
     // Fetch all notaries from the database
     const notaries = await Notary.findAll();
+    // console.log(notaries);
 
     // filter out data from notaries to show to the user
     const filteredNotaries = notaries.map((notary) => {
-      const { id, notary_name, address, profileImage } = notary;
+      const { cnic, notary_name, address, profileImage } = notary;
+      // console.log(id);
       return {
-        id,
+        cnic,
         image: profileImage,
         notaryName: notary_name,
         address,
@@ -425,5 +432,180 @@ export const getNotaries = async (req, res) => {
   } catch (error) {
     console.error("Error fetching notaries:", error);
     return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const getSpecificNotary = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the data corresponding to that notary.
+    const notary = await Notary.findOne({
+      where: {
+        cnic: id,
+      },
+    });
+
+    // find the time slots of the notary against each day on which noary is available and then create an object like.
+
+    const NotaryAvailabilityIds = await NotaryAvailability.findAll({
+      where: {
+        notaryId: id,
+      },
+    });
+
+    // console.log(NotaryAvailabilityIds.map((item) => item.dayTimeId));
+
+    //find day Id and time slots id against each daytime id
+    const dayTimeIds = NotaryAvailabilityIds.map((item) => item.dayTimeId);
+
+    const dayTimeData = await DayTimes.findAll({
+      where: {
+        id: dayTimeIds,
+      },
+    });
+
+    // console.log(dayTimeData.map((item) => item.toJSON()));
+
+    const dayTimeDataArray = dayTimeData.map((item) => item.toJSON());
+
+    // group the time slots against each dayid and then create an object like day and time slots
+
+    const dayTimeDataGrouped = dayTimeDataArray.reduce((acc, item) => {
+      if (!acc[item.day_id]) {
+        acc[item.day_id] = [];
+      }
+      acc[item.day_id].push(item.time_slot_id);
+      return acc;
+    }, {});
+
+    // console.log(dayTimeDataGrouped);
+
+    // now we have to find the day name and time slots name against each day id and time slot id from database and then create an object
+
+    const dayTimeDataGroupedArray = await Promise.all(
+      Object.entries(dayTimeDataGrouped).map(async ([dayId, timeSlotIds]) => {
+        const day = await Days.findOne({
+          where: {
+            id: dayId,
+          },
+        });
+
+        const timeSlots = await TimeSlots.findAll({
+          where: {
+            id: timeSlotIds,
+          },
+        });
+
+        return {
+          day: day.day,
+          timeSlots: timeSlots.map((item) => item.start_time),
+        };
+      })
+    );
+
+    // console.log(dayTimeDataGroupedArray);
+
+    // console.log(obj);
+    if (notary) {
+      // filter out data from notaries to show to the user
+      const { cnic, notary_name, address, profileImage } = notary;
+
+      const notaryObj = {
+        data: {
+          cnic,
+          image: profileImage,
+          notaryName: notary_name,
+          address,
+          totalDocNotarized: 30,
+          amount: "Rs. 200",
+        },
+        dayTimeDataGroupedArray,
+      };
+
+      const notaryArray = [notaryObj];
+      // If notary data is found, send it in the response
+      res.status(200).json(notaryArray);
+    } else {
+      // If notary data is not found, send a 404 error
+      res.status(404).json({ error: "Notary not found" });
+    }
+  } catch (error) {
+    // If an error occurs, send a 500 error
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// handle create appointment
+
+export const createAppointment = async (req, res) => {
+  try {
+    // Extract user CNIC from the decoded JWT token
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { cnic } = decoded;
+
+    // Extract day, date, and timeSlot from the request body
+    const { day, date, timeSlot } = req.body;
+
+    // Find the Day ID based on the day
+    const dayId = await Days.findOne({
+      where: {
+        day,
+      },
+    });
+
+    const DAYID = dayId.dataValues.id;
+
+    // Find the TimeSlot ID based on the timeslot
+    const TimeSlotId = await TimeSlots.findOne({
+      where: {
+        start_time: timeSlot,
+      },
+    });
+
+    const TIMESLOTID = TimeSlotId.dataValues.id;
+
+    // Find the DayTime ID based on the day and time slot
+    const dayTime = await DayTimes.findOne({
+      where: {
+        day_id: DAYID,
+        time_slot_id: TIMESLOTID,
+      },
+    });
+
+    if (!dayTime) {
+      return res.status(404).json({ message: "DayTime not found" });
+    }
+
+    // Find the NotaryAvailability ID based on the DayTime ID
+    const notaryAvailability = await NotaryAvailability.findOne({
+      where: {
+        dayTimeId: dayTime.dataValues.id,
+      },
+    });
+
+    // console.log(notaryAvailability.dataValues.id);
+
+    if (!notaryAvailability) {
+      return res.status(404).json({ message: "NotaryAvailability not found" });
+    }
+
+    // Create an appointment with the found NotaryAvailability ID, date, user ID (CNIC), and status set to false
+    const appointment = await Appointment.create({
+      notaryAvailabilityId: notaryAvailability.dataValues.id,
+      userId: cnic,
+      date,
+      timeSlot: timeSlot,
+      status: false,
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Appointment created successfully" });
+  } catch (error) {
+    console.error("Error creating appointment:", error);
+    return res.status(500).json({ message: "Failed to create appointment" });
   }
 };

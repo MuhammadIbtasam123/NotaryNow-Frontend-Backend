@@ -1,25 +1,34 @@
-import React from 'react';
-import Typography from '@mui/material/Typography';
-import { Box } from '@mui/material';
-import CardComponent from '../HelperFiles/Card';
-import ibtasamImg from '../../../assets/images/ibtasam-fyp.jpg';
-import SelectDate from '../HelperFiles/SelectDate';
-import SelectTime from '../HelperFiles/SelectTime';
-import Button from '@mui/material/Button';
-import './mainFiles.css';
+import React, { useState, useEffect } from "react";
+import Typography from "@mui/material/Typography";
+import { Box } from "@mui/material";
+import CardComponent from "../HelperFiles/Card";
 
-const notariesInformation = [
-  {
-    id: 1,
-    image: ibtasamImg,
-    notaryName: 'A.Nawaz Osmani Law Associates',
-    address: '2-Model Town, Lahore.',
-    totalDocNotarized: 50,
-    amount: 'Rs. 250'
-  }
-];
+import DateTime from "../HelperFiles/DateTime";
+import Button from "@mui/material/Button";
+import "./mainFiles.css";
+import axios from "axios";
+import { useParams } from "react-router-dom/cjs/react-router-dom";
 
 const BookAppointment = () => {
+  const [notaryInfo, setNotaryInfo] = useState([]);
+  const [DayTime, setDayTime] = useState([]);
+  // get the data of notary against specific id.
+  const { id } = useParams();
+  useEffect(() => {
+    const FetchNotaryData = async () => {
+      try {
+        // get the id from params
+        const response = await axios.get(
+          `http://localhost:8080/api/getNotaries/${id}`
+        );
+        setNotaryInfo([response.data[0].data]);
+        setDayTime(response.data[0].dayTimeDataGroupedArray);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    FetchNotaryData();
+  }, [id]);
   return (
     <Box>
       <Box className="headingContainer">
@@ -27,21 +36,16 @@ const BookAppointment = () => {
           Create Appointment
         </Typography>
         <Typography variant="h5" className="subHeadingText">
-          {notariesInformation[0].notaryName}
+          {notaryInfo.notaryName}
         </Typography>
       </Box>
 
       <Box className="mainContainer">
-        <CardComponent notariesInformation={notariesInformation} />
-        <SelectDate />
-        <SelectTime />
-
-        <Button className="bookButton">
-          Book Appointment
-        </Button>
+        <CardComponent notariesInformation={notaryInfo} />
+        <DateTime dayTime={DayTime} />
       </Box>
     </Box>
   );
-}
+};
 
 export default BookAppointment;
