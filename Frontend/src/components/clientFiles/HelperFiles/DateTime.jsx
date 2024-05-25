@@ -6,7 +6,7 @@ import "./HelperStyle.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-const DateTime = ({ dayTime }) => {
+const DateTime = ({ dayTime, BookedSlots }) => {
   const [activeDay, setActiveDay] = useState(null);
   const [activeDate, setActiveDate] = useState(null);
   const [activeTimeSlot, setActiveTimeSlot] = useState(null);
@@ -68,8 +68,6 @@ const DateTime = ({ dayTime }) => {
 
     // Find the available days based on the data from the backend
     const availableDaysFromData = dayTime.map((dayData) => dayData.day);
-    console.log(availableDaysFromData);
-    console.log(daysOfWeek[currentDayIndex]);
 
     // Find the next available working day
     let nextAvailableDayIndex = (currentDayIndex + 1) % 7;
@@ -87,8 +85,26 @@ const DateTime = ({ dayTime }) => {
       .slice(startIndex)
       .concat(availableDaysFromData.slice(0, startIndex));
 
-    setActiveDay(sortedAvailableDays[0]);
+    const activeDay = sortedAvailableDays[0];
+    setActiveDay(activeDay);
     setAvailableDays(sortedAvailableDays);
+
+    // Initialize time slots for the active day
+    const activeDayData = dayTime.find((day) => day.day === activeDay);
+    if (activeDayData) {
+      const convertedTimeSlots = activeDayData.timeSlots.map((time) => {
+        const timeObj = new Date(`2000-01-01T${time}`);
+        return {
+          time: timeObj.toLocaleString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          }),
+          originalTime: time,
+        };
+      });
+      setTimeSlots(convertedTimeSlots);
+    }
   };
 
   useEffect(() => {
@@ -113,12 +129,37 @@ const DateTime = ({ dayTime }) => {
         setTimeSlots(convertedTimeSlots);
       }
     }
-  }, [dayTime, activeDay]);
+  }, [dayTime, activeDay, BookedSlots]);
 
   const handleTimeSlotClick = (index) => {
     setActiveTimeSlot(index);
   };
 
+  const isTimeSlotBooked = (date, timeSlot) => {
+    const currentDate = new Date(date);
+
+    return BookedSlots.some((bookedSlot) => {
+      const bookedDate = new Date(bookedSlot.date);
+
+      // Check if the timeSlot is an array
+      if (Array.isArray(bookedSlot.timeSlot)) {
+        // If it's an array, check if the current date matches, and the current time slot is present in the array
+        return (
+          bookedDate.toDateString() === currentDate.toDateString() &&
+          bookedSlot.timeSlot.some(
+            (bookedTime) => bookedTime === timeSlot.originalTime
+          )
+        );
+      } else {
+        // If it's not an array, use the existing logic
+        const bookedTime = bookedSlot.timeSlot;
+        return (
+          bookedDate.toDateString() === currentDate.toDateString() &&
+          bookedTime === timeSlot.originalTime
+        );
+      }
+    });
+  };
   if (!dayTime) {
     return <div>Loading...</div>; // Render a loading indicator until dayTime is available
   }
@@ -180,7 +221,9 @@ const DateTime = ({ dayTime }) => {
         {timeSlots.map((time, index) => (
           <Box
             key={index}
-            className={`box-style ${index === activeTimeSlot ? "active" : ""}`}
+            className={`box-style ${index === activeTimeSlot ? "active" : ""} ${
+              isTimeSlotBooked(date, time) ? "booked" : ""
+            }`}
             onClick={() => handleTimeSlotClick(index)}
           >
             {time.time}

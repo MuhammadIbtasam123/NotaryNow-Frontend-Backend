@@ -42,6 +42,14 @@ router.route("/getNotaries/:id").get(controller.getSpecificNotary);
 /** Appointment Methods */
 
 router.route("/createAppointment").post(Auth, controller.createAppointment); // create appointment
+router.route("/unpaidAppointments").get(Auth, controller.unpaidAppointments); // get all appointments
+
+// router.route("/viewAppointments").get(Auth, controller.getAppointments); // get all appointments
+// router.route("/deleteAppointment/:id").delete(Auth, controller.deleteAppointment); // delete appointment
+// router.route("/updateAppointment/:id").put(Auth, controller.updateAppointment); // update appointment
+
+// router.route("/unpaidAppointments").get(Auth, controller.unpaidAppointments); // get all appointments
+//router.route("/unconfirmedAppointments").get(Auth, controller.getAppointments); // get all appointments
 
 /* Notary Methods */
 

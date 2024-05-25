@@ -12,6 +12,8 @@ import Appointment from "../model/Appointment.model.js";
 import DayTimes from "../model/dayTime.model.js";
 import Days from "../model/Days.model.js";
 import TimeSlots from "../model/TimeSlots.model.js";
+import { STRING, where } from "sequelize";
+// import Appointment from "../model/Appointment.model.js";
 /** middleware for verify user */
 export async function verifyUser(req, res, next) {
   try {
@@ -34,7 +36,6 @@ export async function verifyUser(req, res, next) {
     return res.status(404).send({ error: "Authentication Error" });
   }
 }
-
 export async function signup(req, res) {
   console.log(req.body);
   const { username, name, email, password, cnic, frontImage, backImage } =
@@ -77,7 +78,6 @@ export async function signup(req, res) {
       .json({ message: "Internal server error", error: error.message });
   }
 }
-
 export async function login(req, res) {
   const { email, password } = req.body;
   console.log(email, password);
@@ -128,7 +128,6 @@ export async function login(req, res) {
     res.status(500).json({ message: "Internal server error" });
   }
 }
-
 /** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req, res) {
   // console.log(req.headers.authorization);
@@ -166,7 +165,6 @@ export async function getUser(req, res) {
     return res.status(500).send({ error: "Internal server error" });
   }
 }
-
 /** PUT: http://localhost:8080/api/updateuser 
  * @param: {
   "header" : "<token>"
@@ -218,7 +216,6 @@ export async function updateUser(req, res) {
     return res.status(500).send({ error: "Internal server error" });
   }
 }
-
 /** GET: http://localhost:8080/api/generateOTP */
 export async function generateOTP(req, res) {
   const { email } = req.body;
@@ -244,7 +241,6 @@ export async function verifyOTP(req, res) {
     return res.status(400).send({ error: "Invalid OTP" });
   }
 }
-
 /** PUT: http://localhost:8080/api/forgotPassword */
 export async function forgotPassword(req, res) {
   const { email } = req.body;
@@ -274,7 +270,6 @@ export async function forgotPassword(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
-
 // Endpoint to handle password reset
 export const resetPassword = async (req, res) => {
   console.log(req.body);
@@ -314,9 +309,7 @@ export const resetPassword = async (req, res) => {
 
   res.status(200).send("Password reset successfully");
 };
-
 // handle get document of users
-
 export const getDocuments = async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -336,9 +329,7 @@ export const getDocuments = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
 // handle upload document
-
 export const uploadDocuments = async (req, res) => {
   try {
     // extract cnic from token
@@ -373,7 +364,6 @@ export const uploadDocuments = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
 // handle delete document
 export const deleteDocument = async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
@@ -405,9 +395,7 @@ export const deleteDocument = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
 // handle get notaries
-
 export const getNotaries = async (req, res) => {
   try {
     // Fetch all notaries from the database
@@ -434,7 +422,6 @@ export const getNotaries = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
 export const getSpecificNotary = async (req, res) => {
   try {
     const { id } = req.params;
@@ -504,9 +491,24 @@ export const getSpecificNotary = async (req, res) => {
       })
     );
 
-    // console.log(dayTimeDataGroupedArray);
+    // figure out that appointment is not already booked.
+    // notary ki availability id hai or ma na ya dekhna hai ka kisi user ki us date pa booking to nhi hai takkay ma data bhej sakun frontend pa to select other slot.
 
-    // console.log(obj);
+    const checkNotaryIsAlreadyBooked = await Appointment.findAll({
+      where: {
+        notaryAvailabilityId: NotaryAvailabilityIds.map((item) => item.id),
+      },
+    });
+
+    let BookedDate = [];
+    // console.log(checkNotaryIsAlreadyBooked[1].dataValues);
+    if (checkNotaryIsAlreadyBooked) {
+      // Assuming checkNotaryIsAlreadyBooked is an array of objects containing booked slots
+      BookedDate = checkNotaryIsAlreadyBooked.map((bookedSlot) => ({
+        date: bookedSlot.dataValues.date,
+        timeSlot: [bookedSlot.dataValues.timeSlot], // Convert single time slot to array
+      }));
+    }
     if (notary) {
       // filter out data from notaries to show to the user
       const { cnic, notary_name, address, profileImage } = notary;
@@ -521,8 +523,10 @@ export const getSpecificNotary = async (req, res) => {
           amount: "Rs. 200",
         },
         dayTimeDataGroupedArray,
+        BookedDate,
       };
 
+      // console.log(notaryObj);
       const notaryArray = [notaryObj];
       // If notary data is found, send it in the response
       res.status(200).json(notaryArray);
@@ -536,9 +540,7 @@ export const getSpecificNotary = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 // handle create appointment
-
 export const createAppointment = async (req, res) => {
   try {
     // Extract user CNIC from the decoded JWT token
@@ -607,5 +609,105 @@ export const createAppointment = async (req, res) => {
   } catch (error) {
     console.error("Error creating appointment:", error);
     return res.status(500).json({ message: "Failed to create appointment" });
+  }
+};
+
+export const unpaidAppointments = async (req, res) => {
+  try {
+    // Extract user CNIC from the decoded JWT token
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { cnic } = decoded;
+
+    console.log(cnic);
+
+    // Find all unpaid appointments for the user
+    const unpaidAppointments = await Appointment.findAll({
+      where: {
+        userId: cnic,
+        clinetPaymentStatus: false,
+      },
+    });
+
+    // Extract the notary availability IDs
+    const notaryAvailabilityIds = unpaidAppointments.map(
+      (appointment) => appointment.notaryAvailabilityId
+    );
+
+    console.log(notaryAvailabilityIds);
+
+    // Fetch the notaries based on the availability IDs
+    const notaries = await NotaryAvailability.findAll({
+      where: {
+        id: notaryAvailabilityIds,
+      },
+    });
+
+    const uniqueNotaryIds = [...new Set(notaries.map((item) => item.notaryId))];
+
+    console.log(uniqueNotaryIds);
+
+    // fetch the notary data based on the unique notary ids
+    const notaryData = await Notary.findAll({
+      where: {
+        cnic: uniqueNotaryIds,
+      },
+    });
+
+    console.log(notaryData);
+
+    const AppointmentDataWithNotary = await Appointment.findAll({
+      where: {
+        userId: cnic,
+      },
+    });
+    // console.log(
+    //   AppointmentDataWithNotary.map((item) => item.dataValues).map(
+    //     (item) => item.date
+    //   )
+    // );
+    // console.log(
+    //   notaryData.map((item) => item.dataValues).map((item) => item.notary_name)
+    // );
+
+    const notaryAppointments = [];
+    AppointmentDataWithNotary.forEach((appointment) => {
+      const appointmentData = appointment.dataValues;
+      const notary = notaryData.map((notary) => notary);
+
+      console.log(notary.map((item) => item.notary_name));
+      // if (notary) {
+      //   const appointmentObj = {
+      //     // image: notary.profileImage,
+      //     username: notary.notary_name,
+      //     amount: notary.amount,
+      //     date: appointmentData.date,
+      //     timeslot: appointmentData.timeSlot,
+      //   };
+      //   notaryAppointments.push(appointmentObj);
+      // }
+    });
+
+    // AppointmentDataWithNotary.forEach((appointment) => {
+    //   const appointmentData = appointment.dataValues;
+    //   const notary = notaryData.map((notary) => notary);
+    //   if (notary) {
+    //     const appointmentObj = {
+    //       // image: notary.profileImage,
+    //       username: notary.notary_name,
+    //       amount: notary.amount,
+    //       date: appointmentData.date,
+    //       timeslot: appointmentData.timeSlot,
+    //     };
+    //     notaryAppointments.push(appointmentObj);
+    //   }
+    // });
+
+    console.log(notaryAppointments);
+
+    return res.status(200).json();
+  } catch (error) {
+    console.error("Error fetching unpaid appointments:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

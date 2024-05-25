@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom/cjs/react-router-dom";
 const BookAppointment = () => {
   const [notaryInfo, setNotaryInfo] = useState([]);
   const [DayTime, setDayTime] = useState([]);
+  const [BookedSlots, setBookedSlots] = useState([]);
   // get the data of notary against specific id.
   const { id } = useParams();
   useEffect(() => {
@@ -23,6 +24,8 @@ const BookAppointment = () => {
         );
         setNotaryInfo([response.data[0].data]);
         setDayTime(response.data[0].dayTimeDataGroupedArray);
+        setBookedSlots(response.data[0].BookedDate);
+        console.log(response.data[0].BookedDate);
       } catch (error) {
         console.log(error);
       }
@@ -42,7 +45,7 @@ const BookAppointment = () => {
 
       <Box className="mainContainer">
         <CardComponent notariesInformation={notaryInfo} />
-        <DateTime dayTime={DayTime} />
+        <DateTime dayTime={DayTime} BookedSlots={BookedSlots} />
       </Box>
     </Box>
   );

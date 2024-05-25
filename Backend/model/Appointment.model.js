@@ -36,9 +36,20 @@ Appointment.init(
       type: DataTypes.STRING, // Assuming the time slot is stored as a string
       allowNull: false,
     },
-    status: {
+    notaryConfirmationStatus: {
       type: DataTypes.BOOLEAN,
       allowNull: true,
+      defaultValue: false,
+    },
+    clinetPaymentStatus: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
+    paidReceipt: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: null,
     },
   },
   {
