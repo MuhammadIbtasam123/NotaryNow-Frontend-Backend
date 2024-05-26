@@ -12,8 +12,12 @@ import Appointment from "../model/Appointment.model.js";
 import DayTimes from "../model/dayTime.model.js";
 import Days from "../model/Days.model.js";
 import TimeSlots from "../model/TimeSlots.model.js";
-import { STRING, where } from "sequelize";
-// import Appointment from "../model/Appointment.model.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import sequelize from "../database/config.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** middleware for verify user */
 export async function verifyUser(req, res, next) {
   try {
@@ -548,8 +552,10 @@ export const createAppointment = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { cnic } = decoded;
 
+    console.log(req.body);
+    console.log(cnic);
     // Extract day, date, and timeSlot from the request body
-    const { day, date, timeSlot } = req.body;
+    const { day, date, timeSlot, NID } = req.body;
 
     // Find the Day ID based on the day
     const dayId = await Days.findOne({
@@ -585,8 +591,11 @@ export const createAppointment = async (req, res) => {
     const notaryAvailability = await NotaryAvailability.findOne({
       where: {
         dayTimeId: dayTime.dataValues.id,
+        notaryId: NID,
       },
     });
+
+    console.log(notaryAvailability.dataValues.id);
 
     // console.log(notaryAvailability.dataValues.id);
 
@@ -634,80 +643,221 @@ export const unpaidAppointments = async (req, res) => {
       (appointment) => appointment.notaryAvailabilityId
     );
 
-    console.log(notaryAvailabilityIds);
+    // console.log(notaryAvailabilityIds);
 
     // Fetch the notaries based on the availability IDs
     const notaries = await NotaryAvailability.findAll({
       where: {
         id: notaryAvailabilityIds,
       },
+      order: [
+        [
+          sequelize.literal(
+            `CASE "id" ${notaryAvailabilityIds
+              .map((value, index) => `WHEN ${value} THEN ${index}`)
+              .join(" ")} ELSE ${notaryAvailabilityIds.length} END`
+          ),
+          "ASC",
+        ],
+      ],
     });
 
-    const uniqueNotaryIds = [...new Set(notaries.map((item) => item.notaryId))];
-
-    console.log(uniqueNotaryIds);
+    // console.log(notaries.map((item) => item.notaryId));
 
     // fetch the notary data based on the unique notary ids
-    const notaryData = await Notary.findAll({
-      where: {
-        cnic: uniqueNotaryIds,
-      },
-    });
+    const notaryData = await Promise.all(
+      notaries.map(async (item) => {
+        const notaryId = item.notaryId;
+        const data = await Notary.findAll({
+          where: {
+            cnic: notaryId,
+          },
+        });
+        return data;
+      })
+    );
 
-    console.log(notaryData);
+    const notaryDataArray = notaryData.map((item) => item[0].dataValues);
 
     const AppointmentDataWithNotary = await Appointment.findAll({
       where: {
         userId: cnic,
       },
     });
-    // console.log(
-    //   AppointmentDataWithNotary.map((item) => item.dataValues).map(
-    //     (item) => item.date
-    //   )
-    // );
-    // console.log(
-    //   notaryData.map((item) => item.dataValues).map((item) => item.notary_name)
-    // );
 
-    const notaryAppointments = [];
-    AppointmentDataWithNotary.forEach((appointment) => {
-      const appointmentData = appointment.dataValues;
-      const notary = notaryData.map((notary) => notary);
-
-      console.log(notary.map((item) => item.notary_name));
-      // if (notary) {
-      //   const appointmentObj = {
-      //     // image: notary.profileImage,
-      //     username: notary.notary_name,
-      //     amount: notary.amount,
-      //     date: appointmentData.date,
-      //     timeslot: appointmentData.timeSlot,
-      //   };
-      //   notaryAppointments.push(appointmentObj);
-      // }
+    const AppointmentData = AppointmentDataWithNotary.map((appointment) => {
+      const { date, timeSlot } = appointment.dataValues;
+      return {
+        date,
+        timeSlot,
+      };
     });
 
-    // AppointmentDataWithNotary.forEach((appointment) => {
-    //   const appointmentData = appointment.dataValues;
-    //   const notary = notaryData.map((notary) => notary);
-    //   if (notary) {
-    //     const appointmentObj = {
-    //       // image: notary.profileImage,
-    //       username: notary.notary_name,
-    //       amount: notary.amount,
-    //       date: appointmentData.date,
-    //       timeslot: appointmentData.timeSlot,
-    //     };
-    //     notaryAppointments.push(appointmentObj);
-    //   }
-    // });
+    // console.log(AppointmentData);
+    // now we have to create a notary array of object having notary data and appointment data
 
-    console.log(notaryAppointments);
+    const notaryArray = notaryDataArray.map((notary, idx) => {
+      const { notary_name, profileImage } = notary;
 
-    return res.status(200).json();
+      const notaryObj = {
+        image: profileImage,
+        notaryName: notary_name,
+        amount: "Rs. 200",
+      };
+
+      return {
+        notaryObj,
+        AppointmentData: AppointmentData[idx],
+        notaryAvailabilityIds: notaryAvailabilityIds[idx],
+      };
+    });
+    // console.log(notaryArray);
+
+    return res.status(200).json(notaryArray);
   } catch (error) {
     console.error("Error fetching unpaid appointments:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const uploadReceipts = async (req, res) => {
+  try {
+    // Extract user CNIC from the decoded JWT token
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { cnic } = decoded;
+
+    // Extract notary availability ID and date from the request body
+    const { notaryAvaialableId, dateToSend } = req.body;
+    console.log(notaryAvaialableId, dateToSend);
+
+    // Get the uploaded file from the request
+    const receipt = req.file;
+
+    console.log(receipt);
+
+    if (!receipt) {
+      return res.status(400).json({ message: "Receipt file is required." });
+    }
+
+    // Update the database with the receipt file path
+    const filePath = path.join(__dirname, "..", "uploads", receipt.filename);
+    const AppointmentReceipt = await Appointment.update(
+      {
+        clinetPaymentStatus: true,
+        paidReceipt: filePath,
+      },
+      {
+        where: {
+          userId: cnic,
+          notaryAvailabilityId: notaryAvaialableId,
+          date: dateToSend,
+        },
+      }
+    );
+
+    // Return a success response
+    return res.status(200).json({ message: "Receipt uploaded successfully." });
+  } catch (error) {
+    console.error("Error uploading receipt:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const upcomingAppointments = async (req, res) => {
+  try {
+    // Extract user CNIC from the decoded JWT token
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { cnic } = decoded;
+
+    console.log(cnic);
+
+    // Find all upcoming appointments for the user
+    const upcomingAppointments = await Appointment.findAll({
+      where: {
+        userId: cnic,
+        clinetPaymentStatus: true,
+        notaryConfirmationStatus: false, // cahnge to true
+      },
+    });
+
+    // console.log(upcomingAppointments.map((item) => item.dataValues));
+
+    // Extract the notary availability IDs
+    const notaryAvailabilityIds = upcomingAppointments.map(
+      (appointment) => appointment.notaryAvailabilityId
+    );
+
+    // console.log(notaryAvailabilityIds);
+
+    // Fetch the notaries based on the availability IDs
+    const notaries = await NotaryAvailability.findAll({
+      where: {
+        id: notaryAvailabilityIds,
+      },
+      order: [
+        [
+          sequelize.literal(
+            `CASE "id" ${notaryAvailabilityIds
+              .map((value, index) => `WHEN ${value} THEN ${index}`)
+              .join(" ")} ELSE ${notaryAvailabilityIds.length} END`
+          ),
+          "ASC",
+        ],
+      ],
+    });
+
+    // console.log(notaries.map((item) => item));
+
+    // fetch the notary data based on the unique notary ids
+    const notaryData = await Promise.all(
+      notaries.map(async (item) => {
+        const notaryId = item.notaryId;
+        const data = await Notary.findAll({
+          where: {
+            cnic: notaryId,
+          },
+        });
+        return data;
+      })
+    );
+
+    // console.log(notaryData.map((item) => item[0].dataValues));
+
+    const notaryDataArray = notaryData.map((item) => item[0].dataValues);
+
+    // console.log(notaryDataArray);
+
+    const AppointmentData = upcomingAppointments.map((appointment) => {
+      const { date, timeSlot } = appointment.dataValues;
+      return {
+        date,
+        timeSlot,
+      };
+    });
+
+    // now we have to create a notary array of object having notary data and appointment data
+    const notaryArray = notaryDataArray.map((notary, idx) => {
+      const { notary_name, profileImage } = notary;
+
+      const notaryObj = {
+        image: profileImage,
+        notaryName: notary_name,
+        amount: "Rs. 200",
+      };
+
+      return {
+        notaryObj,
+        AppointmentData: AppointmentData[idx],
+        notaryAvailabilityIds: notaryAvailabilityIds[idx],
+      };
+    });
+    // console.log(notaryArray);
+
+    return res.status(200).json(notaryArray);
+  } catch (error) {
+    console.error("Error fetching upcoming appointments:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

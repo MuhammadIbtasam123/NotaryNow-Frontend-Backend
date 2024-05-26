@@ -6,7 +6,7 @@ import "./HelperStyle.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-const DateTime = ({ dayTime, BookedSlots }) => {
+const DateTime = ({ dayTime, BookedSlots, NID }) => {
   const [activeDay, setActiveDay] = useState(null);
   const [activeDate, setActiveDate] = useState(null);
   const [activeTimeSlot, setActiveTimeSlot] = useState(null);
@@ -22,6 +22,7 @@ const DateTime = ({ dayTime, BookedSlots }) => {
         const response = await axios.post(
           "http://localhost:8080/api/createAppointment",
           {
+            NID: NID,
             day: activeDay,
             date: date,
             timeSlot: timeSlots[activeTimeSlot].originalTime,

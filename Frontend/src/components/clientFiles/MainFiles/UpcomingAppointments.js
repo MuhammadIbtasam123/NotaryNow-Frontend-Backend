@@ -1,45 +1,68 @@
-import { Box } from '@mui/material';
-import Typography from '@mui/material/Typography';
-import CardU from '../HelperFiles/CardU';
-import './mainFiles.css'; // Import CSS file
-
-const notariesPaymentInformation = [{
-  id: 1,
-  notaryName: 'A.Nawaz Osmani Law Associates',
-  date: '12/12/2021',
-  time: '12:00 PM',
-  amount: 'Rs. 250'
-},{
-  id: 2,
-  notaryName: 'All Pakistan Lawyers Associates',
-  date: '12/12/2021',
-  time: '11:00 PM',
-  amount: 'Rs. 250'
-},{
-  id: 3,
-  notaryName: 'Qureshi Law Associates',
-  date: '12/12/2021',
-  time: '10:00 PM',
-  amount: 'Rs. 250'
-}]
+import { Box } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import CardUp from "../HelperFiles/CardUp";
+import "./mainFiles.css"; // Import CSS file
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const UpcomingAppointments = () => {
+  const [notariesPaymentInformation, setNotariesPaymentInformation] = useState([
+    {
+      id: 1,
+      notaryName: "A.Nawaz Osmani Law Associates",
+      date: "12/12/2021",
+      time: "12:00 PM",
+      amount: "Rs. 250",
+    },
+  ]);
+  useEffect(() => {
+    const getAppointments = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/upcomingAppointment",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        console.log("Unpaid appointments:", response.data);
+        const notaryPaymentInformation = response.data.map(
+          (appointment, index) => {
+            return {
+              id: appointment.notaryAvailabilityIds,
+              notaryName: appointment.notaryObj.notaryName,
+              date: appointment.AppointmentData.date,
+              time: appointment.AppointmentData.timeSlot,
+              amount: appointment.notaryObj.amount,
+              image: appointment.notaryObj.image,
+            };
+          }
+        );
+        console.log("Notary Payment Information:", notaryPaymentInformation);
+        // Update the state with the fetched data
+        setNotariesPaymentInformation(notaryPaymentInformation);
+      } catch (error) {
+        console.error("Error fetching unpaid appointments:", error);
+      }
+    };
+
+    getAppointments();
+  }, []);
   return (
     <Box>
       <Box className="headerSection">
-        <Typography 
-          variant='h5'
-          className="upcomingAppointmentTitle"
-        >
+        <Typography variant="h5" className="upcomingAppointmentTitle">
           Upcoming Appointment
         </Typography>
       </Box>
 
       <Box className="upcomingAppointmentsContainer">
-        <CardU notariesPaymentInformation={notariesPaymentInformation} />
+        <CardUp notariesPaymentInformation={notariesPaymentInformation} />
       </Box>
     </Box>
-  )
-}
+  );
+};
 
 export default UpcomingAppointments;

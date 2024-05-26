@@ -280,3 +280,43 @@
   color: #777;
   cursor: not-allowed;
 }
+
+/* HelperStyle.css */
+
+/* HelperStyle.css */
+
+.fileInputContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.customFileInput {
+  display: none;
+  padding: 0;
+}
+
+.customUploadButton {
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-left: 1rem;
+}
+
+.customUploadButton:hover {
+  background-color: #1565c0;
+}
+
+.customUploadButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Hide the default file input */
+input[type="file"] {
+  display: none;
+}

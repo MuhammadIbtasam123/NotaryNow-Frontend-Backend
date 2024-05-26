@@ -43,6 +43,10 @@ router.route("/getNotaries/:id").get(controller.getSpecificNotary);
 
 router.route("/createAppointment").post(Auth, controller.createAppointment); // create appointment
 router.route("/unpaidAppointments").get(Auth, controller.unpaidAppointments); // get all appointments
+router
+  .route("/uploadPaymentReceipt")
+  .post(Auth, upload.single("receipt"), controller.uploadReceipts); // upload receipt
+router.route("/upcomingAppointment").get(Auth, controller.upcomingAppointments); // get all appointments
 
 // router.route("/viewAppointments").get(Auth, controller.getAppointments); // get all appointments
 // router.route("/deleteAppointment/:id").delete(Auth, controller.deleteAppointment); // delete appointment

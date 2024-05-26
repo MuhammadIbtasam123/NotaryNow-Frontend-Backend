@@ -2,34 +2,26 @@ import React, { useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/material";
 import CardU from "../HelperFiles/CardU";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./mainFiles.css";
 import axios from "axios";
 
-const notariesPaymentInformation = [
-  {
-    id: 1,
-    notaryName: "A.Nawaz Osmani Law Associates",
-    date: "12/12/2021",
-    time: "12:00 PM",
-    amount: "Rs. 250",
-  },
-  {
-    id: 2,
-    notaryName: "All Pakistan Lawyers Associates",
-    date: "12/12/2021",
-    time: "11:00 PM",
-    amount: "Rs. 250",
-  },
-  {
-    id: 3,
-    notaryName: "Qureshi Law Associates",
-    date: "12/12/2021",
-    time: "10:00 PM",
-    amount: "Rs. 250",
-  },
-];
-
 const UnpaidAppointments = () => {
+  const [notariesPaymentInformation, setNotariesPaymentInformation] =
+    React.useState([]);
+  const showToast = (message, type) => {
+    toast[type](message, {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
+  };
   useEffect(() => {
     const getAppointments = async () => {
       try {
@@ -42,9 +34,34 @@ const UnpaidAppointments = () => {
           }
         );
 
-        console.log("Unpaid appointments:", response.data);
+        // console.log("Unpaid appointments:", response.data);
+        if (response.status === 200) {
+          // Show a success toast message
+          const notaryPaymentInformation = response.data.map(
+            (appointment, index) => {
+              return {
+                id: appointment.notaryAvailabilityIds,
+                notaryName: appointment.notaryObj.notaryName,
+                date: appointment.AppointmentData.date,
+                time: appointment.AppointmentData.timeSlot,
+                amount: appointment.notaryObj.amount,
+                image: appointment.notaryObj.image,
+              };
+            }
+          );
+
+          console.log("Notary Payment Information:", notaryPaymentInformation);
+          // Update the state with the fetched data
+          setNotariesPaymentInformation(notaryPaymentInformation);
+          // showToast("User data updated successfully!", "success");
+        }
       } catch (error) {
+        if (notariesPaymentInformation.length === 0) {
+          showToast("No unpaid appointments found!", "info");
+          return;
+        }
         console.error("Error fetching unpaid appointments:", error);
+        showToast("Error fetching unpaid appointments", "error");
       }
     };
 
@@ -61,6 +78,7 @@ const UnpaidAppointments = () => {
       <Box className="contentSection">
         <CardU notariesPaymentInformation={notariesPaymentInformation} />
       </Box>
+      <ToastContainer />
     </Box>
   );
 };
