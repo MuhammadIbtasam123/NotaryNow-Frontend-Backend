@@ -6,15 +6,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const UpcomingAppointments = () => {
-  const [notariesPaymentInformation, setNotariesPaymentInformation] = useState([
-    {
-      id: 1,
-      notaryName: "A.Nawaz Osmani Law Associates",
-      date: "12/12/2021",
-      time: "12:00 PM",
-      amount: "Rs. 250",
-    },
-  ]);
+  const [notariesPaymentInformation, setNotariesPaymentInformation] = useState(
+    []
+  );
   useEffect(() => {
     const getAppointments = async () => {
       try {

@@ -47,6 +47,9 @@ router
   .route("/uploadPaymentReceipt")
   .post(Auth, upload.single("receipt"), controller.uploadReceipts); // upload receipt
 router.route("/upcomingAppointment").get(Auth, controller.upcomingAppointments); // get all appointments
+router
+  .route("/unconfirmedAppointment")
+  .get(Auth, controller.unconfirmedAppointment); // get all appointments
 
 // router.route("/viewAppointments").get(Auth, controller.getAppointments); // get all appointments
 // router.route("/deleteAppointment/:id").delete(Auth, controller.deleteAppointment); // delete appointment
@@ -79,3 +82,8 @@ router
   .route("/EditNotaryAvailability")
   .patch(Auth, Ncontroller.editAvailability); // edit the availability of notary
 export default router;
+
+/* Notary Uncofirm appointments */
+router
+  .route("/notaryUnconfirmedAppointment")
+  .get(Auth, Ncontroller.unconfirmedAppointment);

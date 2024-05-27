@@ -12,6 +12,7 @@ import UploadDocument from "./MainFiles/UploadDocument";
 import CreateAppointment from "./MainFiles/CreateAppointment";
 import BookAppointment from "./MainFiles/BookAppointment";
 import UnpaidAppointments from "./MainFiles/UnpaidAppointments";
+import UnconfirmedAppointments from "./MainFiles/UnconfirmedAppoitnemnt";
 import UpcomingAppointmnets from "./MainFiles/UpcomingAppointments";
 import NoatrizedDocuments from "./MainFiles/NotarizedDocuments";
 import QuizApp from "./MainFiles/Quiz";
@@ -86,6 +87,16 @@ const User = () => {
                       Unpaid Appointments
                     </Button>
                   </Link>
+                  <Link to="/User/Unconfirmed-Appointments">
+                    <Button
+                      sx={{
+                        ...UserStyles.buttonStyle,
+                        "&:hover": { ...UserStyles.buttonStyleHover },
+                      }}
+                    >
+                      Unconfirm Appointment
+                    </Button>
+                  </Link>
                   <Link to="/User/Upcoming-Appointments">
                     <Button
                       sx={{
@@ -132,6 +143,11 @@ const User = () => {
                   exact
                   path="/User/Unpaid-Appointments"
                   component={UnpaidAppointments}
+                />
+                <Route
+                  exact
+                  path="/User/Unconfirmed-Appointments"
+                  component={UnconfirmedAppointments}
                 />
                 <Route
                   exact

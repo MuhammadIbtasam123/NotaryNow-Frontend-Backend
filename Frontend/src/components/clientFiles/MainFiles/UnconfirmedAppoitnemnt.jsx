@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import CardUNC from "../HelperFiles/CardU";
+import CardUNC from "../HelperFiles/CardUNC";
 import "./mainFiles.css"; // Import CSS file
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -13,7 +13,7 @@ const UnconfirmedAppointments = () => {
     const getAppointments = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/notaryUnconfirmedAppointment",
+          "http://localhost:8080/api/unconfirmedAppointment",
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
