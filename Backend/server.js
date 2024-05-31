@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import router from "./router/route.js";
+import path from "path";
+import { fileURLToPath } from "url";
 import Days from "./model/Days.model.js";
 import TimeSlots from "./model/TimeSlots.model.js";
 import DayTimes from "./model/dayTime.model.js";
@@ -20,7 +22,10 @@ app.use(
 app.use(cors());
 app.use(morgan("tiny"));
 app.disable("x-powered-by"); // less hackers know about our
-
+// Get __dirname in ES module scope
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/public", express.static(path.join(__dirname, "public")));
 const port = 8080;
 
 // If the database table doesn't exist, Sequelize will create it

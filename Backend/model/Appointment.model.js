@@ -2,6 +2,7 @@ import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
 import NotaryAvailability from "./notaryAvailability.model.js"; // Assuming the correct path to the model
 import User from "./user.model.js"; // Assuming the correct path to the model
+import Document from "./Document.model.js"; // Assuming the correct path to the model
 
 class Appointment extends Model {}
 
@@ -26,6 +27,14 @@ Appointment.init(
       references: {
         model: User, // Reference to the User model
         key: "cnic",
+      },
+    },
+    docId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Document, // Reference to the Document model
+        key: "documentId",
       },
     },
     date: {

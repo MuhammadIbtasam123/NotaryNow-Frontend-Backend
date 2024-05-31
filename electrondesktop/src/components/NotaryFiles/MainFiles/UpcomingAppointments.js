@@ -1,30 +1,49 @@
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import CardUP from "../HelperFiles/CardUP";
+import CardU from "../HelperFiles/CardUP";
 import "./mainFiles.css"; // Import CSS file
-
-const notariesPaymentInformation = [
-  {
-    id: 1,
-    userName: "Muhammad Ibtasam",
-    date: "12/12/2021",
-    time: "12:00 PM",
-  },
-  {
-    id: 2,
-    userName: "Ahmad Azeem",
-    date: "12/12/2021",
-    time: "11:00 PM",
-  },
-  {
-    id: 3,
-    userName: "Jawad Ahmed",
-    date: "12/12/2021",
-    time: "10:00 PM",
-  },
-];
+import axios from "axios";
 
 const UpcomingAppointments = () => {
+  const [userPaymentInformation, setUserPaymentInformation] = useState([]);
+  useEffect(() => {
+    const getUpcomingAppointments = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/notaryConfirmedAppointment",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        console.log("Upcoming appointments:", response.data);
+        const userPaymentInformationResponse = await response.data.map(
+          (appointment, index) => {
+            return {
+              id: appointment.AppointmentIds,
+              userName: appointment.userObj.userName,
+              date: appointment.AppointmentData.date,
+              time: appointment.AppointmentData.timeSlot,
+              image: appointment.userObj.image,
+            };
+          }
+        );
+        console.log(
+          "Notary unconfirm appointment Information:",
+          userPaymentInformationResponse
+        );
+        // Update the state with the fetched data
+        setUserPaymentInformation(userPaymentInformationResponse);
+      } catch (error) {
+        console.error("Error fetching unpaid appointments:", error);
+      }
+    };
+
+    getUpcomingAppointments();
+  }, []);
   return (
     <Box>
       <Box className="headerSection">
@@ -34,7 +53,7 @@ const UpcomingAppointments = () => {
       </Box>
 
       <Box className="upcomingAppointmentsContainer">
-        <CardUP notariesPaymentInformation={notariesPaymentInformation} />
+        <CardU userPaymentInformation={userPaymentInformation} />
       </Box>
     </Box>
   );

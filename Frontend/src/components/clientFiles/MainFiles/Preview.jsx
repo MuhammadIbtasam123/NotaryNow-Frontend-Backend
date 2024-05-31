@@ -1,17 +1,27 @@
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import CardUNC from "../HelperFiles/CardU";
+import CardPreview from "../HelperFiles/CardPreview";
 import "./mainFiles.css"; // Import CSS file
-import { useEffect, useState } from "react";
 import axios from "axios";
+import { useParams } from "react-router-dom";
 
-const UnconfirmedAppointments = () => {
-  const [userPaymentInformation, setUserPaymentInformation] = useState([]);
+const Preview = () => {
+  const [userPaymentInformation, setUserPaymentInformation] = useState([
+    {
+      id: 1,
+      userName: "Ibtasam",
+      date: "12/12/2021",
+      time: "12:00 PM",
+      image: "ibtasamImg",
+    },
+  ]);
+  const { id } = useParams();
   useEffect(() => {
-    const getAppointments = async () => {
+    const getUpcomingAppointments = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/api/notaryUnconfirmedAppointment",
+          `http://localhost:8080/api/UserAppointmentDetails/${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -19,26 +29,28 @@ const UnconfirmedAppointments = () => {
           }
         );
 
-        console.log("Unpaid appointments:", response.data);
+        console.log("Upcoming appointments:", response.data);
         const userPaymentInformationResposne = await response.data.map(
           (appointment, index) => {
             return {
-              id: appointment.AppointmentIds,
-              userName: appointment.userObj.userName,
-              date: appointment.AppointmentData.date,
-              time: appointment.AppointmentData.timeSlot,
-              image: appointment.userObj.image,
-              paidReceipt: `http://localhost:8080/${appointment.AppointmentData.paidReceipt.replaceAll(
+              userName: appointment.user.name,
+              date: appointment.time.date,
+              time: appointment.time.time,
+              image: appointment.user.profileImage,
+              docName: appointment.document.DocName,
+              docFile: `http://localhost:8080/${appointment.document.DocFile.replaceAll(
                 "\\",
                 "/"
               )}`,
             };
           }
         );
+
         console.log(
-          "Notary Payment Information:",
+          "User payment information:",
           userPaymentInformationResposne
         );
+
         // Update the state with the fetched data
         setUserPaymentInformation(userPaymentInformationResposne);
       } catch (error) {
@@ -46,21 +58,21 @@ const UnconfirmedAppointments = () => {
       }
     };
 
-    getAppointments();
+    getUpcomingAppointments();
   }, []);
   return (
     <Box>
       <Box className="headerSection">
         <Typography variant="h5" className="upcomingAppointmentTitle">
-          Unconfirmed Appointments
+          Preview
         </Typography>
       </Box>
 
       <Box className="upcomingAppointmentsContainer">
-        <CardUNC userPaymentInformation={userPaymentInformation} />
+        <CardPreview userPaymentInformation={userPaymentInformation} />
       </Box>
     </Box>
   );
 };
 
-export default UnconfirmedAppointments;
+export default Preview;

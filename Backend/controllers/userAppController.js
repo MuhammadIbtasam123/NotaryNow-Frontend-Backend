@@ -15,6 +15,7 @@ import TimeSlots from "../model/TimeSlots.model.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import sequelize from "../database/config.js";
+import Notaries from "../model/notary.model.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -555,7 +556,9 @@ export const createAppointment = async (req, res) => {
     console.log(req.body);
     console.log(cnic);
     // Extract day, date, and timeSlot from the request body
-    const { day, date, timeSlot, NID } = req.body;
+    const { day, date, timeSlot, NID, documentId } = req.body;
+
+    console.log(day, date, timeSlot, NID, documentId);
 
     // Find the Day ID based on the day
     const dayId = await Days.findOne({
@@ -609,6 +612,7 @@ export const createAppointment = async (req, res) => {
       userId: cnic,
       date,
       timeSlot: timeSlot,
+      docId: documentId,
       status: false,
     });
 
@@ -741,7 +745,7 @@ export const uploadReceipts = async (req, res) => {
     }
 
     // Update the database with the receipt file path
-    const filePath = path.join(__dirname, "..", "uploads", receipt.filename);
+    const filePath = receipt.path;
     const AppointmentReceipt = await Appointment.update(
       {
         clinetPaymentStatus: true,
@@ -850,6 +854,7 @@ export const upcomingAppointments = async (req, res) => {
       return {
         notaryObj,
         AppointmentData: AppointmentData[idx],
+        AppointmentId: upcomingAppointments[idx].dataValues.appointmentId,
         notaryAvailabilityIds: notaryAvailabilityIds[idx],
       };
     });
@@ -951,9 +956,118 @@ export const unconfirmedAppointment = async (req, res) => {
         notaryAvailabilityIds: notaryAvailabilityIds[idx],
       };
     });
-    // console.log(notaryArray);
+    console.log(notaryArray);
 
     return res.status(200).json(notaryArray);
+  } catch (error) {
+    console.error("Error fetching upcoming appointments:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getDocumentsAppointment = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { cnic } = decoded;
+  console.log(decoded);
+
+  try {
+    // fetch all documents of user from database
+    const documents = await Document.findAll({
+      where: {
+        UserId: cnic,
+        docStatus: false,
+      },
+    });
+
+    const documentArray = documents.map((document) => {
+      const { documentId, documentName, documentFile } = document;
+      return {
+        documentId,
+        documentName,
+        documentFile,
+      };
+    });
+
+    return res.status(200).json(documentArray);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+export const UserAppointmentDetails = async (req, res) => {
+  try {
+    // Extract user CNIC from the decoded JWT token
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { cnic } = decoded;
+    const { id } = req.params;
+
+    // console.log(cnic, id);
+
+    //fetching the appointment details using id
+
+    const appointment = await Appointment.findOne({
+      where: {
+        appointmentId: id,
+        clinetPaymentStatus: true,
+        notaryConfirmationStatus: true,
+      },
+    });
+
+    // console.log(appointment);
+
+    // now i had to fetch the notary data from availabilities table
+
+    const notaryId = await NotaryAvailability.findOne({
+      where: {
+        id: appointment.dataValues.notaryAvailabilityId,
+      },
+    });
+
+    // console.log(notaryId.dataValues);
+
+    const notary = await Notaries.findOne({
+      where: {
+        cnic: notaryId.dataValues.notaryId,
+      },
+    });
+
+    // console.log(notary.dataValues);
+
+    // now we have to fetch the document data from document table using docId that is in appointment table
+
+    const document = await Document.findOne({
+      where: {
+        documentId: appointment.dataValues.docId,
+      },
+    });
+
+    // console.log(document.dataValues);
+
+    // creating the object to send back to the frontend
+
+    const data = {
+      user: {
+        name: notary.dataValues.name,
+        profileImage: notary.dataValues.profileImage,
+      },
+      document: {
+        DocName: document.dataValues.documentName,
+        DocFile: document.dataValues.documentFile,
+      },
+      time: {
+        time: appointment.dataValues.timeSlot,
+        date: appointment.dataValues.date,
+      },
+    };
+
+    // convert to Array
+    const dataArray = [data];
+    // console.log(dataArray);
+
+    return res.status(200).json(dataArray);
   } catch (error) {
     console.error("Error fetching upcoming appointments:", error);
     return res.status(500).json({ message: "Internal server error" });

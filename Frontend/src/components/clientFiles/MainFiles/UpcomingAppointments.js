@@ -21,11 +21,12 @@ const UpcomingAppointments = () => {
           }
         );
 
-        console.log("Unpaid appointments:", response.data);
+        console.log("Notary Payment Information before:", response.data);
         const notaryPaymentInformation = response.data.map(
           (appointment, index) => {
             return {
               id: appointment.notaryAvailabilityIds,
+              appId: appointment.AppointmentId,
               notaryName: appointment.notaryObj.notaryName,
               date: appointment.AppointmentData.date,
               time: appointment.AppointmentData.timeSlot,
@@ -34,7 +35,10 @@ const UpcomingAppointments = () => {
             };
           }
         );
-        console.log("Notary Payment Information:", notaryPaymentInformation);
+        console.log(
+          "Notary Payment Information After:",
+          notaryPaymentInformation
+        );
         // Update the state with the fetched data
         setNotariesPaymentInformation(notaryPaymentInformation);
       } catch (error) {

@@ -33,8 +33,9 @@ Document.init(
       allowNull: true,
     },
     docStatus: {
-      type: DataTypes.STRING,
+      type: DataTypes.BOOLEAN,
       allowNull: true,
+      defaultValue: false,
     },
     signedTimestamp: {
       type: DataTypes.DATE,

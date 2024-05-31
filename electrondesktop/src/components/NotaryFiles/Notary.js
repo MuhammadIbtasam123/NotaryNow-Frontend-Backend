@@ -18,6 +18,7 @@ import UpcomingAppointmnets from "./MainFiles/UpcomingAppointments";
 import NoatrizedDocuments from "./MainFiles/NotarizedDocuments";
 import AvailabilityForm from "./MainFiles/Availability";
 import Missing from "./MainFiles/Missing";
+import preview from "./MainFiles/Preview";
 
 import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
 import * as UserStyles from "./NotaryStyle";
@@ -99,7 +100,7 @@ const Notary = () => {
                       Notarized Documents
                     </Button>
                   </Link>
-                  <Link to="/Notary/Session">
+                  <Link to="/Notary/preview">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
@@ -137,6 +138,7 @@ const Notary = () => {
                   path="/Notary/Unconfirm-Appointments"
                   component={UnconfirmAppointments}
                 />
+                <Route exact path="/Notary/preview/:id" component={preview} />
                 <Route exact path="/Notary" component={Profile} />
                 <Route exact path="*" component={Missing} />
               </Switch>

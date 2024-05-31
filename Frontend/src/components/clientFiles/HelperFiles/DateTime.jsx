@@ -6,6 +6,7 @@ import "./HelperStyle.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import DocumentDropdown from "./SelectDocument";
 const DateTime = ({ dayTime, BookedSlots, NID }) => {
   const [activeDay, setActiveDay] = useState(null);
   const [activeDate, setActiveDate] = useState(null);
@@ -13,6 +14,10 @@ const DateTime = ({ dayTime, BookedSlots, NID }) => {
   const [timeSlots, setTimeSlots] = useState([]);
   const [availableDays, setAvailableDays] = useState([]);
   const [date, setDate] = useState("");
+
+  //states for documents
+  const [documents, setDocuments] = useState([]);
+  const [selectedDocumentId, setSelectedDocumentId] = useState("");
 
   // Function to handle booking appointment
   const bookAppointment = async () => {
@@ -26,6 +31,7 @@ const DateTime = ({ dayTime, BookedSlots, NID }) => {
             day: activeDay,
             date: date,
             timeSlot: timeSlots[activeTimeSlot].originalTime,
+            documentId: selectedDocumentId,
           },
           {
             headers: {
@@ -109,6 +115,24 @@ const DateTime = ({ dayTime, BookedSlots, NID }) => {
   };
 
   useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/api/getDocumentsAppointment",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log("Documents:", response.data);
+        setDocuments(response.data);
+      } catch (error) {
+        console.error("Error fetching documents", error);
+      }
+    };
+
+    fetchDocuments();
     initializeAvailableDays();
   }, [dayTime]);
 
@@ -231,6 +255,14 @@ const DateTime = ({ dayTime, BookedSlots, NID }) => {
           </Box>
         ))}
       </Box>
+
+      {/* dropdown menu to selct documents */}
+      <DocumentDropdown
+        documents={documents}
+        selectedDocumentId={selectedDocumentId}
+        setSelectedDocumentId={setSelectedDocumentId}
+      />
+
       <Button className="bookButton" onClick={bookAppointment}>
         Book Appointment
       </Button>

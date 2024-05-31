@@ -32,6 +32,9 @@ router.route("/generateOTP").post(localVariables, controller.generateOTP); // ge
 router.route("/verifyOTP").post(controller.verifyOTP); // verify generated OTP
 router.route("/getDocuments").get(Auth, controller.getDocuments); // get all documents
 router.route("/deleteDocument/:id").delete(Auth, controller.deleteDocument); // delete document
+router
+  .route("/getDocumentsAppointment")
+  .get(Auth, controller.getDocumentsAppointment); // get all appointments
 /** PUT Methods */
 router.route("/updateUser").put(Auth, controller.updateUser); // is use to update the user profile
 router.route("/forgotPassword").put(controller.forgotPassword); // use to reset password
@@ -50,6 +53,9 @@ router.route("/upcomingAppointment").get(Auth, controller.upcomingAppointments);
 router
   .route("/unconfirmedAppointment")
   .get(Auth, controller.unconfirmedAppointment); // get all appointments
+router
+  .route("/UserAppointmentDetails/:id")
+  .get(Auth, controller.UserAppointmentDetails); // confirm appointment
 
 // router.route("/viewAppointments").get(Auth, controller.getAppointments); // get all appointments
 // router.route("/deleteAppointment/:id").delete(Auth, controller.deleteAppointment); // delete appointment
@@ -69,13 +75,14 @@ router.route("/notary").get(Ncontroller.getNotary); // get notary data
 router.route("/generateOTP").post(localVariables, Ncontroller.generateOTP); // generate random OTP for notary
 router.route("/verifyOTP").post(Ncontroller.verifyOTP); // verify generated OTP for notary
 
-/* */
+/* passwords */
 router.route("/updateNotary").put(Auth, Ncontroller.updateNotary); // is use to update the user profile
 router.route("/notaryforgotPassword").put(Ncontroller.notrayforgotPassword); // use to reset password for notary
 router
   .route("/notaryresetPassword/:token")
   .put(Ncontroller.notaryresetPassword); // use to reset password for notary
 
+/* Notary availabilities */
 router.route("/AvailabilityForm").post(Auth, Ncontroller.Availability); // set the availability of notary
 router.route("/NotaryAvailability").get(Auth, Ncontroller.getAvailability); // get the availability of notary
 router
@@ -83,7 +90,14 @@ router
   .patch(Auth, Ncontroller.editAvailability); // edit the availability of notary
 export default router;
 
-/* Notary Uncofirm appointments */
+/* Notary appointments */
 router
   .route("/notaryUnconfirmedAppointment")
-  .get(Auth, Ncontroller.unconfirmedAppointment);
+  .get(Auth, Ncontroller.unconfirmedAppointment); // get all unconfirmed appointments
+router.route("/confirmAppointment").post(Auth, Ncontroller.confirmAppointment); // confirm appointment
+router
+  .route("/notaryConfirmedAppointment")
+  .get(Auth, Ncontroller.notaryConfirmedAppointment); // view appointment
+router
+  .route("/AppointmentDetails/:id")
+  .get(Auth, Ncontroller.AppointmentDetails); // get all appointments
