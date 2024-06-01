@@ -12,6 +12,7 @@ import Appointment from "../model/Appointment.model.js";
 import DayTimes from "../model/dayTime.model.js";
 import Days from "../model/Days.model.js";
 import TimeSlots from "../model/TimeSlots.model.js";
+import Meeting from "../model/Meeting.model.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import sequelize from "../database/config.js";
@@ -1046,6 +1047,16 @@ export const UserAppointmentDetails = async (req, res) => {
 
     // console.log(document.dataValues);
 
+    // getting the meeting data from meeting table
+
+    const meeting = await Meeting.findOne({
+      where: {
+        appId: id,
+      },
+    });
+
+    console.log(meeting.dataValues);
+
     // creating the object to send back to the frontend
 
     const data = {
@@ -1060,6 +1071,10 @@ export const UserAppointmentDetails = async (req, res) => {
       time: {
         time: appointment.dataValues.timeSlot,
         date: appointment.dataValues.date,
+      },
+      meetingData: {
+        name: notary.dataValues.name,
+        meetingId: meeting.dataValues.roomId,
       },
     };
 

@@ -100,7 +100,7 @@ const Notary = () => {
                       Notarized Documents
                     </Button>
                   </Link>
-                  <Link to="/Notary/preview">
+                  {/* <Link to="/Notary/preview">
                     <Button
                       sx={{
                         ...UserStyles.buttonStyle,
@@ -109,7 +109,7 @@ const Notary = () => {
                     >
                       Start Video Call
                     </Button>
-                  </Link>
+                  </Link> */}
                 </Stack>
               </Item>
             </AppBar>

@@ -24,6 +24,19 @@ const CardPreview = ({ userPaymentInformation }) => {
     }
   };
 
+  const handleSessionStart = () => {
+    // console.log("Start session", userPaymentInformation);
+    // console.log("Start session", userPaymentInformation[0].meetingId);
+    // console.log("Start session", userPaymentInformation[0].meetingUserName);
+    // Start the session
+    const url = `https://notarization-session.netlify.app/?room=${
+      userPaymentInformation[0].meetingId
+    }&name=${encodeURIComponent(userPaymentInformation[0].meetingUserName)}`;
+
+    // redirect to the URL
+    window && window.open(url, "_blank");
+  };
+
   return (
     <>
       {userPaymentInformation.map((user, index) => (
@@ -81,6 +94,7 @@ const CardPreview = ({ userPaymentInformation }) => {
           color: "white",
           marginTop: "10px",
         }}
+        onClick={handleSessionStart}
       >
         Start Session
       </Button>

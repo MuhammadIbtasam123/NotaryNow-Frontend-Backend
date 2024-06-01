@@ -12,7 +12,9 @@ import Days from "../model/Days.model.js";
 import TimeSlots from "../model/TimeSlots.model.js";
 import Appointment from "../model/Appointment.model.js";
 import Document from "../model/Document.model.js";
+import Meeting from "../model/Meeting.model.js";
 // import sequelize from "../database/config.js";
+import { RoomIdGenerator } from "../helperFunctions/generateRoomId.js";
 import { Op } from "sequelize";
 
 /** middleware for verify Notary */
@@ -698,6 +700,33 @@ export const confirmAppointment = async (req, res) => {
       }
     );
 
+    // Create a new meeting instance
+
+    const getRommId = await RoomIdGenerator();
+
+    // console.log(getRommId);
+
+    //check if the meeting already exists
+    const meeting = await Meeting.findOne({
+      where: {
+        appId: appointmentId,
+      },
+    });
+
+    if (meeting) {
+      return res.status(200).json({ message: "Appointment confirmed" });
+    }
+
+    // if not create a new meeting
+
+    const newMeeting = new Meeting({
+      roomId: getRommId,
+      appId: appointmentId,
+    });
+
+    // Save the meeting to the database
+    await newMeeting.save();
+
     return res.status(200).json({ message: "Appointment confirmed" });
   } catch (error) {
     console.error("Error confirming appointment:", error);
@@ -824,6 +853,16 @@ export const AppointmentDetails = async (req, res) => {
 
     // console.log(document.dataValues);
 
+    //get the meeting data from meeting table using appointment id
+
+    const meeting = await Meeting.findOne({
+      where: {
+        appId: id,
+      },
+    });
+
+    console.log(meeting.dataValues);
+
     // creating the object to send back to the frontend
 
     const data = {
@@ -839,11 +878,15 @@ export const AppointmentDetails = async (req, res) => {
         time: appointment.dataValues.timeSlot,
         date: appointment.dataValues.date,
       },
+      meetingData: {
+        name: user.dataValues.name,
+        meetingId: meeting.dataValues.roomId,
+      },
     };
 
     // convert to Array
     const dataArray = [data];
-    // console.log(dataArray);
+    console.log(dataArray);
 
     return res.status(200).json(dataArray);
   } catch (error) {

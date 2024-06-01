@@ -38,19 +38,19 @@ const CardU = ({ userPaymentInformation }) => {
             <CardContent className="cardContent">
               <Typography
                 variant="h6"
-                className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+                className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               >
                 Name: {notary.userName}
               </Typography>
               <Typography
                 variant="subtitle2"
-                className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+                className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               >
                 Date: {notary.date}
               </Typography>
               <Typography
                 variant="subtitle2"
-                className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+                className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               >
                 Time: {notary.time}
               </Typography>

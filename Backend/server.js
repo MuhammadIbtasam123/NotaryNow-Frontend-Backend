@@ -9,6 +9,7 @@ import TimeSlots from "./model/TimeSlots.model.js";
 import DayTimes from "./model/dayTime.model.js";
 import NotaryAvailability from "./model/notaryAvailability.model.js";
 import Appointment from "./model/Appointment.model.js";
+import Meeting from "./model/Meeting.model.js";
 const app = express();
 
 /** middlewares */
@@ -35,6 +36,7 @@ TimeSlots.sync();
 DayTimes.sync();
 NotaryAvailability.sync();
 Appointment.sync();
+Meeting.sync();
 
 /** HTTP GET Request */
 app.get("/", (req, res) => {

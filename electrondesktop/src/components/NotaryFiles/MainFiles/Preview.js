@@ -42,6 +42,8 @@ const Preview = () => {
                 "\\",
                 "/"
               )}`,
+              meetingId: appointment.meetingData.meetingId,
+              meetingUserName: appointment.meetingData.name,
             };
           }
         );

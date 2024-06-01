@@ -29,19 +29,19 @@ const CardUp = ({ notariesPaymentInformation }) => {
             <CardContent className="cardContent">
               <Typography
                 variant="h6"
-                className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+                className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               >
                 Name: {notariesPaymentInformation[index].notaryName}
               </Typography>
               <Typography
                 variant="subtitle2"
-                className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+                className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               >
                 Date: {notariesPaymentInformation[index].date}
               </Typography>
               <Typography
                 variant="subtitle2"
-                className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+                className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               >
                 Time: {notariesPaymentInformation[index].time}
               </Typography>
@@ -49,7 +49,7 @@ const CardUp = ({ notariesPaymentInformation }) => {
 
             <Typography
               variant="subtitle1"
-              className={index % 2 === 0 ? "cardTextWhite" : "cardTextBlack"}
+              className={index % 2 === 0 ? "cardTextWhite" : "cardTextWhite"}
               component="div"
             >
               {notary.amount}
