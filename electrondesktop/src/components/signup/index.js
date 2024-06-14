@@ -5,7 +5,6 @@ import React from "react";
 import "./index.css";
 import UserImg from "../../assets/images/USer.png";
 import { useState } from "react";
-import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -19,7 +18,8 @@ const Signup = ({ AccountName }) => {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [cnic, setCnic] = useState("");
-  const [showToastFlag, setShowToastFlag] = useState(false);
+  const [contact, setContact] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
   const history = useHistory();
 
   const showToast = (message, type) => {
@@ -74,15 +74,18 @@ const Signup = ({ AccountName }) => {
           username: username,
           email: email,
           password: password,
-          // confirmpassword: confirmpassword,
           cnic: cnicFormat,
+          contact: contact,
+          licenseNumber: licenseNumber,
         }
       );
 
       if (response.status === 200) {
         showToast("Signup Successful!", "success");
         // redirect to Landing page using react router
-        // history.push('/login');
+        setTimeout(() => {
+          history.push("/generateCertificate");
+        }, 2500);
       } else if (response.status === 500) {
         showToast("Error SignUp!", "error");
       }
@@ -91,15 +94,6 @@ const Signup = ({ AccountName }) => {
     }
   };
 
-  useEffect(() => {
-    let timer;
-    if (showToastFlag) {
-      timer = setTimeout(() => {
-        history.push("/login");
-      }, 2000); // Redirect to login after 2 seconds when toast is shown
-    }
-    return () => clearTimeout(timer);
-  }, [showToastFlag, history]);
   return (
     <Box className="LoginContainer">
       <Box className="LoginBox">
@@ -193,6 +187,35 @@ const Signup = ({ AccountName }) => {
               (regex.test(userInput) || userInput === "") && setCnic(userInput);
             }}
           />
+
+          {/* Contact */}
+
+          <input
+            id="contact"
+            type="text"
+            placeholder="Contact"
+            className="text-field"
+            name="contact"
+            value={contact}
+            onChange={(event) => {
+              setContact(event.target.value);
+            }}
+          />
+
+          {/* License Number */}
+
+          <input
+            id="licenseNumber"
+            type="text"
+            placeholder="License Number"
+            className="text-field"
+            name="licenseNumber"
+            value={licenseNumber}
+            onChange={(event) => {
+              setLicenseNumber(event.target.value);
+            }}
+          />
+
           <button
             className="login-button"
             type="button"
@@ -212,9 +235,3 @@ const Signup = ({ AccountName }) => {
 };
 
 export default Signup;
-
-/*
-should be the path where server is hosted and listening to,  then /endpint work.
-endpoint: http://localhost:3001/notarysignup
-
-*/

@@ -12,7 +12,9 @@ import Days from "../model/Days.model.js";
 import TimeSlots from "../model/TimeSlots.model.js";
 import Appointment from "../model/Appointment.model.js";
 import Document from "../model/Document.model.js";
+import Stamp from "../model/Stamp.model.js";
 import Meeting from "../model/Meeting.model.js";
+import generateStamp from "../helperFunctions/generateStamp.js";
 // import sequelize from "../database/config.js";
 import { RoomIdGenerator } from "../helperFunctions/generateRoomId.js";
 import { Op } from "sequelize";
@@ -43,8 +45,8 @@ export async function verifyNotary(req, res, next) {
 // NOTARY SIGNUP CONTROLLER
 
 export async function signupNotary(req, res) {
-  console.log(req.body);
-  const { name, username, email, password, cnic } = req.body;
+  const { name, username, email, password, cnic, contact, licenseNumber } =
+    req.body;
   try {
     // Check if the notary or email already exists in the database
     const existingNotary = await Notary.findOne({
@@ -59,16 +61,33 @@ export async function signupNotary(req, res) {
     }
 
     // Create a new notary instance
-    const newNotary = new Notary({
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newNotary = await Notary.create({
       name,
       notary_name: username,
       email,
-      password: await bcrypt.hash(password, 10),
+      password: hashedPassword,
       cnic,
+      contact,
+      license: licenseNumber,
     });
 
-    // Save the notary to the database
-    const savedNotary = await newNotary.save();
+    console.log("start generating stamp buffer...");
+    //Generate stamp image buffer (assuming you have a function named generateStamp)
+    const stampImageBuffer = await generateStamp(
+      name,
+      cnic,
+      licenseNumber,
+      contact
+    );
+
+    // Create a new stamp record in the database
+    const newStamp = await Stamp.create({
+      stampImage: stampImageBuffer,
+      notaryId: cnic, // Associate the stamp with the created notary public
+    });
+
+    console.log("stamp created...");
 
     res.status(200).json({
       message: "Notary signed up successfully",
@@ -292,21 +311,32 @@ export async function getNotary(req, res) {
 
   try {
     // Find the user by cnic
-    const user = await Notary.findOne({
+    const notary = await Notary.findOne({
       where: {
         cnic,
       },
     });
     // console.log(user.dataValues);
-    if (!user) {
-      return res.status(404).send({ error: "User not found" });
+    if (!notary) {
+      return res.status(404).send({ error: "Notary not found" });
     }
 
-    // PostgreSQL return unnecessary data with object so convert it into json
-    const { password, ...rest } = user.toJSON();
-    // console.log(rest);
+    //getting the stamp of notary against cnic
 
-    return res.status(200).send(rest);
+    const stamp = await Stamp.findOne({
+      where: {
+        notaryId: cnic,
+      },
+    });
+
+    // PostgreSQL return unnecessary data with object so convert it into json
+    const { password, ...notaryData } = notary.toJSON();
+    const rest = {
+      ...notaryData,
+      stampImage: stamp ? stamp.stampImage : null,
+    };
+
+    return res.status(200).setHeader("Content-Type", "image/jpeg").send(rest);
   } catch (error) {
     console.error("Error retrieving user data:", error);
     return res.status(500).send({ error: "Internal server error" });
@@ -841,6 +871,12 @@ export const AppointmentDetails = async (req, res) => {
       },
     });
 
+    const notary = await Notary.findOne({
+      where: {
+        cnic,
+      },
+    });
+
     // console.log(user.dataValues);
 
     // now we have to fetch the document data from document table using docId that is in appointment table
@@ -869,10 +905,15 @@ export const AppointmentDetails = async (req, res) => {
       user: {
         name: user.dataValues.name,
         profileImage: user.dataValues.profileImage,
+        Nid: cnic, //notary id
+        Nname: notary.dataValues.name,
       },
       document: {
         DocName: document.dataValues.documentName,
         DocFile: document.dataValues.documentFile,
+        DocId: document.dataValues.documentId,
+        DocUpdatedFilePath: document.dataValues.documentFileUpdated,
+        documentSignedPath: document.dataValues.documentSignedUpdated,
       },
       time: {
         time: appointment.dataValues.timeSlot,
@@ -891,6 +932,33 @@ export const AppointmentDetails = async (req, res) => {
     return res.status(200).json(dataArray);
   } catch (error) {
     console.error("Error fetching upcoming appointments:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getStamp = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+
+    const stamp = await Stamp.findOne({
+      where: {
+        notaryId: id,
+      },
+    });
+
+    if (!stamp) {
+      return res.status(404).json({ message: "Stamp not found" });
+    }
+
+    // Assuming stampImage is stored as a base64 string or binary data in the database
+    const stampImage = stamp.stampImage; // Adjust this line if necessary based on your model
+    return res
+      .status(200)
+      .setHeader("Content-Type", "image/jpeg")
+      .send(Buffer.from(stampImage, "base64")); // or 'binary' if stored as binary data
+  } catch (error) {
+    console.error("Error fetching stamp:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

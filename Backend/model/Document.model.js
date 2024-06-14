@@ -1,6 +1,7 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../database/config.js";
 import User from "../model/user.model.js"; // Import the User model
+import Notaries from "../model/notary.model.js"; // Import the Notary model
 
 class Document extends Model {}
 
@@ -21,11 +22,35 @@ Document.init(
       },
     },
     notaryId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING, // Changed to STRING to match cnic type in Notaries
       allowNull: true,
+      references: {
+        model: Notaries,
+        key: "cnic",
+      },
     },
     documentFile: {
-      type: DataTypes.STRING, // Store file path or use DataTypes.BLOB if storing in the database
+      type: DataTypes.STRING, // Store file path
+      allowNull: true,
+    },
+    documentFileUpdated: {
+      type: DataTypes.STRING, // Store file updated path
+      allowNull: true,
+    },
+    documentdata: {
+      type: DataTypes.BLOB,
+      allowNull: false,
+    },
+    updatedDocumnetData: {
+      type: DataTypes.BLOB,
+      allowNull: true,
+    },
+    DocumentSignedData: {
+      type: DataTypes.BLOB,
+      allowNull: true,
+    },
+    documentSignedUpdated: {
+      type: DataTypes.STRING, // Store signed file updated path
       allowNull: true,
     },
     documentName: {
@@ -41,6 +66,11 @@ Document.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    synchoronizeFlag: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
   },
   {
     sequelize,
@@ -49,7 +79,7 @@ Document.init(
 );
 
 // Define the relationship between Document and User
-Document.belongsTo(User, { foreignKey: "UserId" }); // Adjust the foreign key if needed
+Document.belongsTo(User, { foreignKey: "UserId" });
 
 // If the database does not exist, create it
 Document.sync();

@@ -54,7 +54,6 @@ User.init(
   }
 );
 
-// if database is not there
 User.sync();
 
 export default User;

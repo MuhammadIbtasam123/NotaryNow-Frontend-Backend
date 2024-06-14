@@ -33,11 +33,15 @@ const Preview = () => {
         const userPaymentInformationResposne = await response.data.map(
           (appointment, index) => {
             return {
+              Nid: appointment.user.Nid,
+              Nname: appointment.user.Nname,
               userName: appointment.user.name,
               date: appointment.time.date,
               time: appointment.time.time,
               image: appointment.user.profileImage,
+              docId: appointment.document.DocId,
               docName: appointment.document.DocName,
+              docUpdatedPath: appointment.document.DocUpdatedFilePath,
               docFile: `http://localhost:8080/${appointment.document.DocFile.replaceAll(
                 "\\",
                 "/"

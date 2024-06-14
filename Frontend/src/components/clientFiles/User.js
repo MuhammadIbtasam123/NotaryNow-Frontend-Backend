@@ -15,7 +15,7 @@ import UnpaidAppointments from "./MainFiles/UnpaidAppointments";
 import UnconfirmedAppointments from "./MainFiles/UnconfirmedAppoitnemnt";
 import UpcomingAppointmnets from "./MainFiles/UpcomingAppointments";
 import NoatrizedDocuments from "./MainFiles/NotarizedDocuments";
-import QuizApp from "./MainFiles/Quiz";
+import EditPdfView from "./HelperFiles/EditPdfView";
 import Preview from "./MainFiles/Preview";
 import Missing from "./MainFiles/Missing";
 import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
@@ -161,6 +161,11 @@ const User = () => {
                   component={NoatrizedDocuments}
                 />
                 <Route exact path="/User/preview/:id" component={Preview} />
+                <Route
+                  exact
+                  path="/User/eSignDoc/:docid"
+                  component={EditPdfView}
+                />
                 <Route exact path="/User" component={Profile} />
                 <Route path="*" component={Missing} />
               </Switch>

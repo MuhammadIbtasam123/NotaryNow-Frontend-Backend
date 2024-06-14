@@ -15,12 +15,12 @@ const upload = multer({ storage });
 /** import all controllers */
 import * as controller from "../controllers/userAppController.js";
 import * as Ncontroller from "../controllers/NotaryAppController.js";
+import * as Key from "../controllers/KeyController.js";
+import * as Sign from "../controllers/SignPdf/index.js";
+import * as DocR from "../controllers/DocumentRestrict.controller.js";
 
 /** POST Methods */
 router.route("/signup").post(controller.signup); // signup user in database
-// router
-//   .route("/authenticate")
-//   .post(controller.verifyUser, (req, res) => res.end()); // authenticate user
 router.route("/login").post(controller.login); // login in app
 router
   .route("/uploadDocument")
@@ -31,6 +31,7 @@ router.route("/user").get(controller.getUser); // get user data
 router.route("/generateOTP").post(localVariables, controller.generateOTP); // generate random OTP
 router.route("/verifyOTP").post(controller.verifyOTP); // verify generated OTP
 router.route("/getDocuments").get(Auth, controller.getDocuments); // get all documents
+router.route("/getDocument/:id").get(controller.getDocumentById); // get specific document
 router.route("/deleteDocument/:id").delete(Auth, controller.deleteDocument); // delete document
 router
   .route("/getDocumentsAppointment")
@@ -57,15 +58,7 @@ router
   .route("/UserAppointmentDetails/:id")
   .get(Auth, controller.UserAppointmentDetails); // confirm appointment
 
-// router.route("/viewAppointments").get(Auth, controller.getAppointments); // get all appointments
-// router.route("/deleteAppointment/:id").delete(Auth, controller.deleteAppointment); // delete appointment
-// router.route("/updateAppointment/:id").put(Auth, controller.updateAppointment); // update appointment
-
-// router.route("/unpaidAppointments").get(Auth, controller.unpaidAppointments); // get all appointments
-//router.route("/unconfirmedAppointments").get(Auth, controller.getAppointments); // get all appointments
-
 /* Notary Methods */
-
 /* Login/Signup of Notary */
 router.route("/notarysignup").post(Ncontroller.signupNotary); // signup notary in database
 router.route("/notarylogin").post(Ncontroller.notarylogin); // notary login controller
@@ -101,3 +94,17 @@ router
 router
   .route("/AppointmentDetails/:id")
   .get(Auth, Ncontroller.AppointmentDetails); // get all appointments
+
+router.route("/generate-key").post(Key.generateKeyStore); // get all appointments
+router
+  .route("/sign-document")
+  .post(Auth, upload.single("keystoreFile"), Sign.SignDoc); // get all appointments
+
+router.route("/get-stamp/:id").get(Ncontroller.getStamp); // get all appointments
+
+/* Document synchronization  */
+
+router.route("/restrictDocumentEdit").post(Auth, DocR.DocumentRestrict); // restrict document edit
+router
+  .route("/uploadUpdatedDocument")
+  .post(upload.single("pdfFile"), DocR.uploadUpdatedDocument); // upload updated document

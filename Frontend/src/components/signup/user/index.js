@@ -200,30 +200,28 @@ const Signup = ({ AccountName }) => {
               (regex.test(userInput) || userInput === "") && setCnic(userInput);
             }}
           />
-          {/* Front side image input field */}
-          <div className="file-input">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                onUpload(e, "front");
-              }}
-              onClick={(e) => {
-                // setOpenPreview(true);
-              }}
-            />
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                onUpload(e, "back");
-              }}
-              onClick={(e) => {
-                // setOpenPreview(true);
-              }}
-            />
-          </div>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              onUpload(e, "front");
+            }}
+            style={{
+              display: "inline-block", // or "block"
+            }}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              onUpload(e, "back");
+            }}
+            style={{
+              display: "inline-block", // or "block"
+            }}
+          />
+
           <button
             className="login-button"
             type="button"
@@ -236,35 +234,10 @@ const Signup = ({ AccountName }) => {
           </Link>
         </Box>
       </Box>
-      {/* <Modal open={openPreview} onClose={() => setOpenPreview(false)}>
-        <div
-          className="modal"
-          sx={{
-            width: 300,
-            height: 300,
 
-            backgroundColor: "white",
-            borderRadius: "8px",
-            boxShadow: 24,
-            p: 2,
-          }}
-        >
-          <img
-            src={previewSide === "front" ? frontImageUrl : backImageUrl}
-            alt="Preview"
-            style={{ width: "20%", height: "20%", objectFit: "contain" }}
-          />
-        </div>
-      </Modal> */}
       <ToastContainer />
     </Box>
   );
 };
 
 export default Signup;
-
-/*
-should be the path where server is hosted and listening to,  then /endpint work.
-endpoint: http://localhost:3001/signup
-
-*/

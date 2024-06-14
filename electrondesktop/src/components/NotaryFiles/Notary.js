@@ -19,6 +19,7 @@ import NoatrizedDocuments from "./MainFiles/NotarizedDocuments";
 import AvailabilityForm from "./MainFiles/Availability";
 import Missing from "./MainFiles/Missing";
 import preview from "./MainFiles/Preview";
+import EditPdfView from "./HelperFiles/EitPdfView";
 
 import { BrowserRouter as Router, Route, Switch, Link } from "react-router-dom";
 import * as UserStyles from "./NotaryStyle";
@@ -139,6 +140,7 @@ const Notary = () => {
                   component={UnconfirmAppointments}
                 />
                 <Route exact path="/Notary/preview/:id" component={preview} />
+                <Route exact path="/notarize/:docid" component={EditPdfView} />
                 <Route exact path="/Notary" component={Profile} />
                 <Route exact path="*" component={Missing} />
               </Switch>

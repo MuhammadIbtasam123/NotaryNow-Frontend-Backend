@@ -12,7 +12,6 @@ Notaries.init(
     name: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null,
     },
     email: {
       type: DataTypes.STRING,
@@ -31,43 +30,34 @@ Notaries.init(
     contact: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null,
     },
-
     Seal_Issue: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null,
     },
     Expiry_data: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null,
     },
     address: {
       type: DataTypes.STRING,
       allowNull: true,
-      defaultValue: null,
     },
     license: {
       type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: null,
     },
     profileImage: {
       type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: null,
     },
     price: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: null,
     },
     totalDocNotarized: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      defaultValue: null,
     },
   },
   {
@@ -76,7 +66,6 @@ Notaries.init(
   }
 );
 
-// if database is not there
 Notaries.sync();
 
 export default Notaries;

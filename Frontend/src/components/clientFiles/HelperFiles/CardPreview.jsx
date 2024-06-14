@@ -6,6 +6,7 @@ import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import PDFViewer from "./PDFViewer";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./HelperStyle.css";
 
 const CardPreview = ({ userPaymentInformation }) => {
@@ -88,16 +89,43 @@ const CardPreview = ({ userPaymentInformation }) => {
       >
         View Document
       </Button>
-      <Button
-        style={{
-          backgroundColor: "#0D3343",
-          color: "white",
-          marginTop: "10px",
-        }}
-        onClick={handleSessionStart}
-      >
-        Start Session
-      </Button>
+      {userPaymentInformation && userPaymentInformation[0] && (
+        <>
+          <Link
+            to={`/User/eSignDoc/${userPaymentInformation[0].docId}+${userPaymentInformation[0].Cname}`}
+          >
+            <Button
+              style={{
+                backgroundColor: "#0D3343",
+                color: "white",
+                marginTop: "10px",
+              }}
+            >
+              Add E-Sign/Stamp - Document
+            </Button>
+          </Link>
+          {/* <Button
+            style={{
+              backgroundColor: "#0D3343",
+              color: "white",
+              marginTop: "10px",
+            }}
+            // onClick={handleSeeUpdatedDocument}
+          >
+            View Updated Document
+          </Button> */}
+          <Button
+            style={{
+              backgroundColor: "#0D3343",
+              color: "white",
+              marginTop: "10px",
+            }}
+            onClick={handleSessionStart}
+          >
+            Start Session
+          </Button>
+        </>
+      )}
     </>
   );
 };

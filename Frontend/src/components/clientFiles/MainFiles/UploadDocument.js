@@ -70,7 +70,7 @@ const UploadDocument = () => {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/pdf",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -120,8 +120,10 @@ const UploadDocument = () => {
           <input
             type="file"
             id="fileInput"
+            accept="application/pdf"
             onChange={(e) => handleFileSelect(e)}
             className="uploadFileButton"
+            formEncType="multipart/form-data"
           />
         </Box>
         <Button onClick={handleFileUpload} variant="contained" color="primary">

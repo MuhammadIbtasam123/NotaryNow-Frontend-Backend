@@ -8,13 +8,13 @@ import { useParams } from "react-router-dom";
 
 const Preview = () => {
   const [userPaymentInformation, setUserPaymentInformation] = useState([
-    {
-      id: 1,
-      userName: "Ibtasam",
-      date: "12/12/2021",
-      time: "12:00 PM",
-      image: "ibtasamImg",
-    },
+    // {
+    //   id: 1,
+    //   userName: "Ibtasam",
+    //   date: "12/12/2021",
+    //   time: "12:00 PM",
+    //   image: "ibtasamImg",
+    // },
   ]);
   const { id } = useParams();
   useEffect(() => {
@@ -33,10 +33,13 @@ const Preview = () => {
         const userPaymentInformationResposne = await response.data.map(
           (appointment, index) => {
             return {
+              Cid: appointment.user.Cid,
+              Cname: appointment.user.CName,
               userName: appointment.user.name,
               date: appointment.time.date,
               time: appointment.time.time,
               image: appointment.user.profileImage,
+              docId: appointment.document.DocId,
               docName: appointment.document.DocName,
               docFile: `http://localhost:8080/${appointment.document.DocFile.replaceAll(
                 "\\",

@@ -14,6 +14,7 @@ import Days from "../model/Days.model.js";
 import TimeSlots from "../model/TimeSlots.model.js";
 import Meeting from "../model/Meeting.model.js";
 import path from "path";
+import fs from "fs/promises"; // Use fs.promises to read the file
 import { fileURLToPath } from "url";
 import sequelize from "../database/config.js";
 import Notaries from "../model/notary.model.js";
@@ -49,11 +50,8 @@ export async function signup(req, res) {
 
   try {
     // Check if the username or email already exists in the database
-    const existingUser = await User.findOne({
-      where: {
-        cnic,
-      },
-    });
+    const existingUser = await User.findOne({ where: { cnic } });
+
     if (existingUser) {
       return res
         .status(400)
@@ -74,11 +72,14 @@ export async function signup(req, res) {
     // Save the user to the database
     const savedUser = await newUser.save();
 
-    res.status(200).json({
-      message: "User signed up successfully",
-    }); // Return the saved user object
+    res.status(200).json({ message: "User signed up successfully" });
   } catch (error) {
     console.error(`An error occurred while signing up user: ${error.message}`);
+    if (error.errors) {
+      error.errors.forEach((err) => {
+        console.error(`Validation error: ${err.message}`);
+      });
+    }
     res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
@@ -171,16 +172,7 @@ export async function getUser(req, res) {
     return res.status(500).send({ error: "Internal server error" });
   }
 }
-/** PUT: http://localhost:8080/api/updateuser 
- * @param: {
-  "header" : "<token>"
-}
-body: {
-    firstName: '',
-    address : '',
-    profile : ''
-}
-*/
+
 export async function updateUser(req, res) {
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -347,19 +339,25 @@ export const uploadDocuments = async (req, res) => {
 
     // Extract the PDF file from the request
     const pdfFile = req.file;
-    console.log(pdfFile);
+    // console.log(pdfFile);
 
     // Check if the PDF file exists
     if (!pdfFile) {
       return res.status(400).json({ message: "PDF file is required." });
     }
 
+    const buffer = await fs.readFile(pdfFile.path);
+    console.log("Buffer: ", buffer);
+
     // Store the PDF file in the database
     const document = await Document.create({
       UserId: cnic, // Assuming userId is provided in the request body
       documentFile: pdfFile.path,
       documentName: pdfFile.originalname,
+      documentdata: buffer,
     });
+
+    console.log(document.toJSON());
 
     // Return a success response
     return res
@@ -401,6 +399,37 @@ export const deleteDocument = async (req, res) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
+export const getDocumentById = async (req, res) => {
+  try {
+    console.log(req.params);
+    // Extract the document ID from the request params
+    const { id } = req.params;
+    // Fetch the document from the database based on docid
+    const document = await Document.findByPk(id);
+
+    if (!document) {
+      return res
+        .status(404)
+        .json({ error: `Document not found for the given docid ${id}` });
+    }
+
+    // Check if the document is currently being edited
+    if (document.synchoronizeFlag) {
+      return res.status(403).json({
+        message: "Document is currently open in edit mode by someone else.",
+      });
+    }
+
+    // Send the document data as a response
+    res.setHeader("Content-Type", "application/pdf"); // Set the response content type
+    res.send(document.documentdata); // Send the document data
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
 // handle get notaries
 export const getNotaries = async (req, res) => {
   try {
@@ -1037,6 +1066,14 @@ export const UserAppointmentDetails = async (req, res) => {
 
     // console.log(notary.dataValues);
 
+    const user = await User.findOne({
+      where: {
+        cnic,
+      },
+    });
+
+    // console.log(user.dataValues);
+
     // now we have to fetch the document data from document table using docId that is in appointment table
 
     const document = await Document.findOne({
@@ -1063,10 +1100,14 @@ export const UserAppointmentDetails = async (req, res) => {
       user: {
         name: notary.dataValues.name,
         profileImage: notary.dataValues.profileImage,
+        Cid: cnic, //user id needed to send back to the frontend
+        CName: user.dataValues.name, // needed for user signature
       },
       document: {
         DocName: document.dataValues.documentName,
         DocFile: document.dataValues.documentFile,
+        DocId: document.dataValues.documentId,
+        // DocUpdatedFilePath: document.dataValues.documentFileUpdated,
       },
       time: {
         time: appointment.dataValues.timeSlot,
@@ -1080,7 +1121,7 @@ export const UserAppointmentDetails = async (req, res) => {
 
     // convert to Array
     const dataArray = [data];
-    // console.log(dataArray);
+    console.log(dataArray);
 
     return res.status(200).json(dataArray);
   } catch (error) {

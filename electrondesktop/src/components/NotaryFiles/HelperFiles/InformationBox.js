@@ -7,7 +7,6 @@ import "./HelperStyle.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useHistory } from "react-router-dom";
 import "./HelperStyle.css";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import { convertToBase64 } from "../HelperFunctions/helperFunctions.js";
@@ -25,21 +24,18 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
     "Address",
     "CNIC", //initial
     "UserName",
-    "NotificationNo", // Added attribute
-    "Seal-Issue", // Added attribute
-    "ExpiryDate", // Added attribute
-    "License", // Added attribute
+    "Stamp",
+    "License",
   ];
 
   const [username, setUserName] = useState("");
   const [address, setAddress] = useState("");
   const [contact, setContact] = useState("");
-  const [NotificationNo, setNotificationNo] = useState("");
+  const [License, setLicense] = useState("");
   const [SealIssue, setSealIssue] = useState("");
-  const [ExpiryDate, setExpiryDate] = useState("");
+  const [stamp, setStamp] = useState("");
   const [PersonalInformationData, setPersonalInformationData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const history = useHistory();
 
   const showToast = (message, type) => {
     toast[type](message, {
@@ -68,22 +64,6 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
 
   const handleSaveChanges = async () => {
     try {
-      console.log(
-        "Address:",
-        address,
-        "Contact:",
-        contact,
-        "UserName:",
-        username,
-        "NotificationNo:",
-        NotificationNo,
-        "SealIssue:",
-        SealIssue,
-        "ExpiryDate:",
-        ExpiryDate
-        // "Image:",
-        // selectedImage
-      );
       setOpenDialog(false); // Close the dialog
 
       // Send a PUT request to the backend to update the user data
@@ -92,10 +72,6 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
         {
           address,
           contact,
-          username,
-          NotificationNo,
-          SealIssue,
-          ExpiryDate,
           selectedImage,
         },
         {
@@ -117,10 +93,10 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
           UserUpdatedData.address,
           UserUpdatedData.cnic,
           UserUpdatedData.notary_name,
-          UserUpdatedData.NotificationNo,
-          UserUpdatedData.SealIssue,
-          UserUpdatedData.ExpiryDate,
+          "",
+          UserUpdatedData.license,
         ]);
+
         setSelectedImage(UserUpdatedData.profileImage);
         // Show a success toast message
         showToast("notary data updated successfully!", "success");
@@ -152,6 +128,15 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
         if (response.status === 200) {
           // Extract the user data from the response
           const userData = response.data;
+
+          if (userData.stampImage) {
+            const blob = new Blob([new Uint8Array(userData.stampImage.data)], {
+              type: "image/jpeg",
+            });
+            const imageUrl = URL.createObjectURL(blob);
+            setStamp(imageUrl);
+          }
+
           const personalData = [
             userData.name,
             userData.contact,
@@ -159,14 +144,12 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
             userData.address,
             userData.cnic,
             userData.notary_name,
-            userData.NotificationNo,
-            userData.SealIssue,
-            userData.ExpiryDate,
+            "",
+            userData.license,
           ];
           setSelectedImage(userData.profileImage);
           // Update the state with the user data
           setPersonalInformationData(personalData);
-          // setSelectedImage(userData.profileImage);
         } else {
           // Handle unsuccessful response
           showToast(
@@ -254,6 +237,7 @@ const InformationBox = ({ selectedImage, setSelectedImage }) => {
             )}
           </Grid>
         </Grid>
+        <img src={stamp} alt="" />
       </Grid>
 
       <Dialog

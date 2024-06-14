@@ -1,7 +1,7 @@
 .LoginContainer{
     background-color: #D3E3F6 !important;
     width: 100vw;
-    height: 90vh;
+    height: 100vh;
     padding-top: 10vh;
 
 }
@@ -9,21 +9,22 @@
 .LoginBox{
     background-color: #FFFFFF;
     width: 60vw;
-    height: 80vh;
+    height: 95vh;
     margin: 0 auto;
     border-radius: 10px ;
-    border : 1px solid black;
+    /* border : 1px solid black; */
     display: flex;
     align-items: center;
     justify-content: center;
+    /* padding-bottom: 1rem; */
 }
 
 .LoginUserImg{
     width: 50%;
-    height: 80vh;
+    height: 95vh;
     background-color: #0D3343;
     border-radius: 10px 0px 0px 10px;
-    border-right: 1px solid black;
+    /* border-right: 1px solid black; */
     display: flex;
     flex-direction: column;
     align-items: center;

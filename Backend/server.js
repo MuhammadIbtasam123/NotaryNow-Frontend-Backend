@@ -10,6 +10,8 @@ import DayTimes from "./model/dayTime.model.js";
 import NotaryAvailability from "./model/notaryAvailability.model.js";
 import Appointment from "./model/Appointment.model.js";
 import Meeting from "./model/Meeting.model.js";
+import Stamp from "./model/Stamp.model.js";
+
 const app = express();
 
 /** middlewares */
@@ -22,21 +24,30 @@ app.use(
 
 app.use(cors());
 app.use(morgan("tiny"));
-app.disable("x-powered-by"); // less hackers know about our
+app.disable("x-powered-by"); // less hackers know about our server
+
 // Get __dirname in ES module scope
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(
+  "/generated",
+  express.static(path.join(__dirname, "controllers", "generated"))
+);
+
+console.log(__dirname);
+
 const port = 8080;
 
 // If the database table doesn't exist, Sequelize will create it
-
-Days.sync();
-TimeSlots.sync();
-DayTimes.sync();
-NotaryAvailability.sync();
-Appointment.sync();
-Meeting.sync();
+// Days.sync();
+// TimeSlots.sync();
+// DayTimes.sync();
+// NotaryAvailability.sync();
+// Appointment.sync();
+// Meeting.sync();
+Stamp.sync();
 
 /** HTTP GET Request */
 app.get("/", (req, res) => {
